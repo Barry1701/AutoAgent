@@ -23,7 +23,7 @@ Welcome to MetaChain! MetaChain is a **Fully-Automated** and highly **Self-Devel
 ## ✨Features
 
 * **Top 1** 🏆 open-sourced method in GAIA benchmark, with performance comparable to **OpenAI's Deep Research**.
-* **Top 1** 🏆 Agentic-RAG with native self-managing vector database, outperforming LangChain. 
+* **Top 1** 🏆 Agentic-RAG with native self-managing vector database, outperforming **LangChain**. 
 * Create ready-to-use **tools**, **agents** and **workflows** using natural language **only**.
 * Support for **ALL** LLMs (OpenAI, Anthropic, vLLM, Grok, Huggingface ...)
 * Support both **function-calling** and **ReAct**.
