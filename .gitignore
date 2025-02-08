@@ -25,3 +25,7 @@ evaluation/**/data/
 .env
 
 terminal_tmp/*
+
+!tool_docs.csv
+
+.port*

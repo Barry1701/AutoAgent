@@ -8,13 +8,6 @@ def load_cookies_from_json(json_path):
         cookies = json.load(f)
     return cookies
 
-# COOKIES_LIST = []
-# COOKIES_LIST += load_cookies_from_json(wd / "cookie_json" / "orcid.org.cookies.json")
-# COOKIES_LIST += load_cookies_from_json(wd / "cookie_json" / "www.researchgate.net.cookies.json")
-# COOKIES_LIST += load_cookies_from_json(wd / "cookie_json" / "github.com.cookies.json")
-# COOKIES_LIST += load_cookies_from_json(wd / "cookie_json" / "www.youtube.com.cookies.json")
-# COOKIES_LIST += load_cookies_from_json(wd / "cookie_json" / "www.ncbi.nlm.nih.gov.cookies.json")
-# COOKIES_LIST += load_cookies_from_json(wd / "cookie_json" / "archive.org.cookies.json")
 
 def convert_cookies_to_python():
     all_cookies = []

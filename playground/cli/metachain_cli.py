@@ -32,7 +32,8 @@ from rich.columns import Columns
 from rich.text import Text
 from rich.panel import Panel
 import re
-
+from playground.cli.metachain_meta_agent import meta_agent
+from playground.cli.metachain_meta_workflow import meta_workflow
 def get_args(): 
     parser = argparse.ArgumentParser(description="working@tjb-tech")
     parser.add_argument('--container_name', type=str, default='gpu_test')
@@ -148,63 +149,14 @@ def user_mode(model: str, context_variables: dict, debug: bool = True):
 
         # attempt to parse model_answer
         if model_answer_raw.startswith('Case resolved'):
-            model_answer = re.findall(r'<solution>(.*?)</solution>', model_answer_raw)
+            model_answer = re.findall(r'<solution>(.*?)</solution>', model_answer_raw, re.DOTALL)
             if len(model_answer) == 0:
                 model_answer = model_answer_raw
             else:
                 model_answer = model_answer[0]
         else: 
             model_answer = model_answer_raw
-        console.print(f"[bold green][bold magenta]@{agent_name}[/bold magenta] has finished with the response:[/bold green] [bold blue]{model_answer}[/bold blue]")
-        agent = response.agent
-    pass
-def agent_chain(model: str, context_variables: dict, debug: bool = True): 
-    from metachain.agents import get_plan_agent
-    from metachain.agents.programming_triage_agent import get_programming_triage_agent, get_agent_run_agent, get_tool_creation_agent, get_agent_creation_agent
-    programming_triage_agent = get_programming_triage_agent(model)
-    agent_run_agent = get_agent_run_agent(model)
-    tool_creation_agent = get_tool_creation_agent(model)
-    agent_creation_agent = get_agent_creation_agent(model)
-    def transfer_to_programming_triage_agent(): 
-        return programming_triage_agent
-    plan_agent = get_plan_agent(model)
-    plan_agent.functions.append(transfer_to_programming_triage_agent)
-    
-    messages = []
-    agent = plan_agent
-    agents = {plan_agent.name.replace(' ', '_'): plan_agent, programming_triage_agent.name.replace(' ', '_'): programming_triage_agent, agent_run_agent.name.replace(' ', '_'): agent_run_agent, tool_creation_agent.name.replace(' ', '_'): tool_creation_agent, agent_creation_agent.name.replace(' ', '_'): agent_creation_agent}
-    # REPL loop
-    style = Style.from_dict({
-        'bottom-toolbar': 'bg:#333333 #ffffff',
-    })
-
-    # 创建会话
-    session = PromptSession(
-        completer=UserCompleter(agents.keys()),
-        complete_while_typing=True,
-        style=style
-    )
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    mc = MetaChain(timestamp)
-    while True: 
-        # query = ask_text("Tell me what you want to do:")
-        query = session.prompt(
-            'Tell me what you want to do (type "exit" to quit): ',
-            bottom_toolbar=HTML('<b>Prompt:</b> Enter <b>@</b> to mention Agents')
-        )
-        if query.strip().lower() == 'exit':
-            debug_print(debug, 'Agent completed. See you next time! :waving_hand:', color='green')
-            break
-        words = query.split()
-        for word in words:
-            if word.startswith('@') and word[1:] in agents.keys():
-                print(f"[bold magenta]{word}[bold magenta]", end=' ') 
-                agent = agents[word.replace('@', '')]
-            else:
-                print(word, end=' ')
-        messages.append({"role": "user", "content": query})
-        response = mc.run(agent, messages, context_variables, debug=debug)
-        messages.extend(response.messages)
+        console.print(f"[bold green][bold magenta]@{agent_name}[/bold magenta] has finished with the response:\n[/bold green] [bold blue]{model_answer}[/bold blue]")
         agent = response.agent
 
 def tool_to_table(tool_dict: dict):
@@ -240,9 +192,7 @@ def update_guidance(context_variables):
     console.print(Panel(logo_text, style="bold salmon1", expand=True))
     console.print(version_table)
     console.print(Panel(NOTES,title="Important Notes", expand=True))
-    
-def workflow_chain(model: str, debug: bool = True): 
-    pass
+
 def main(args):
     print('\033[s\033[?25l', end='')  # Save cursor position and hide cursor
     with Progress(
@@ -284,16 +234,15 @@ def main(args):
                 user_mode(args.model, context_variables, args.debug)
             case 'agent editor':
                 clear_screen()
-                agent_chain(args.model, context_variables, args.debug)
+                meta_agent(args.model, context_variables, args.debug)
             case 'workflow editor':
                 clear_screen()
-                workflow_chain(args.model, context_variables, args.debug)
+                meta_workflow(args.model, context_variables, args.debug)
             case 'exit':
                 console = Console()
                 logo_text = Text(GOODBYE_LOGO, justify="center")
                 console.print(Panel(logo_text, style="bold salmon1", expand=True))
                 break
-
 
 if __name__ == "__main__":
     args = get_args()
