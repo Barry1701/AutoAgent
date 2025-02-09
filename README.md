@@ -33,7 +33,7 @@ Welcome to MetaChain! MetaChain is a **Fully-Automated** and highly **Self-Devel
 <div align="center">
   <!-- <img src="./assets/metachainnew-intro.pdf" alt="Logo" width="100%"> -->
   <figure>
-    <img src="./assets/metachain_intro.png" alt="Logo" style="max-width: 100%; height: auto;">
+    <img src="./assets/metachain-intro.svg" alt="Logo" style="max-width: 100%; height: auto;">
     <figcaption><em>Quick Overview of MetaChain.</em></figcaption>
   </figure>
 </div>
