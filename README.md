@@ -118,17 +118,12 @@ After the CLI mode is started, you can see the start page of MetaChain:
 
 ## 🔍 How to Use MetaChain
 
-### 1. User Mode (SOTA 🏆 Open Deep Research)
+### 1. `user mode` (SOTA 🏆 Open Deep Research)
 
 MetaChain have a out-of-the-box multi-agent system, which you could choose `user mode` in the start page to use it. This multi-agent system is a general AI assistant, having the same functionality with **OpenAI's Deep Research** and the comparable performance with it in [GAIA](https://gaia-benchmark-leaderboard.hf.space/) benchmark. 
 
 <table>
 <tr align="center">
-    <td width="33%">
-        <img src="./assets/user_mode/select_agent.png" alt="Select Agent" width="100%"/>
-        <br>
-        <em>Use @ to mention the agent you want to use.</em>
-    </td>
     <td width="33%">
         <img src="./assets/user_mode/input.png" alt="Input" width="100%"/>
         <br>
@@ -139,14 +134,21 @@ MetaChain have a out-of-the-box multi-agent system, which you could choose `user
         <br>
         <em>Agent will give you the response.</em>
     </td>
+    <td width="33%">
+        <img src="./assets/user_mode/select_agent.png" alt="Select Agent" width="100%"/>
+        <br>
+        <em>Use @ to mention the agent you want to use. (Optional)</em>
+    </td>
 </tr>
 </table>
 
-### 2. Agent Editor
+### 2. `agent editor` 
 
-### 3. Workflow Editor
+### 3. `workflow editor`
 
 ## ☑️ Todo List
+
+
 
 ## 📖 Documentation
 
