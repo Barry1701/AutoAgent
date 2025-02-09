@@ -41,14 +41,6 @@ Welcome to MetaChain! MetaChain is a **Fully-Automated** and highly **Self-Devel
 
 ## 🔥 News
 
-<style>
-  .scrollable {
-    max-height: 400px; /* 设置最大高度 */
-    overflow-y: scroll; /* 设置垂直滚动条 */
-  }
-</style>
-*(Scroll down for more ...)* ⬇️
-
 <div class="scrollable">
     <ul>
       <li><strong>[2025, Feb 10]</strong>: &nbsp;🎉🎉We've released <b>MetaChain!</b>, including framework, evaluation codes and CLI mode!</li>
@@ -123,6 +115,7 @@ After the CLI mode is started, you can see the start page of MetaChain:
     <figcaption><em>Start Page of MetaChain.</em></figcaption>
   </figure>
 </div>
+
 ## 🔍 How to Use MetaChain
 
 
