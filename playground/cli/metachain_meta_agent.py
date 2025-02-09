@@ -12,6 +12,7 @@ from metachain.agents.meta_agent.agent_creator import get_agent_creator_agent
 import re
 from metachain.agents.meta_agent.form_complie import parse_agent_form
 
+
 def extract_agents_content(text):
     pattern = r'(<agents>.*?</agents>)'
     # re.DOTALL 让 . 也能匹配换行符

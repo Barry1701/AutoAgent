@@ -33,13 +33,98 @@ Welcome to MetaChain! MetaChain is a **Fully-Automated** and highly **Self-Devel
 <div align="center">
   <!-- <img src="./assets/metachainnew-intro.pdf" alt="Logo" width="100%"> -->
   <figure>
-    <img src="./assets/metachain-intro.svg" alt="Logo" style="max-width: 100%; height: auto;">
+    <img src="./assets/metachain-intro-final.svg" alt="Logo" style="max-width: 100%; height: auto;">
     <figcaption><em>Quick Overview of MetaChain.</em></figcaption>
   </figure>
 </div>
 
 
+## 🔥 News
+
+<style>
+  .scrollable {
+    max-height: 400px; /* 设置最大高度 */
+    overflow-y: scroll; /* 设置垂直滚动条 */
+  }
+</style>
+*(Scroll down for more ...)* ⬇️
+
+<div class="scrollable">
+    <ul>
+      <li><strong>[2025, Feb 10]</strong>: &nbsp;🎉🎉We've released <b>MetaChain!</b>, including framework, evaluation codes and CLI mode!</li>
+    </ul>
+</div>
+
 ## ⚡ Quick Start
+
+### Installation
+
+#### MetaChain Installation
+
+```bash
+git clone https://github.com/HKUDS/MetaChain.git
+cd MetaChain
+pip install -e .
+```
+
+#### Docker Installation
+
+We use Docker to containerize the agent-interactive environment. So please install [Docker](https://www.docker.com/) first. And pull the pre-built image with the following command.
+
+```bash
+docker pull tjbtech1/metachain:latest
+```
+
+### API Keys Setup
+
+Create a environment variable file, just like `.env.template`, and set the API keys for the LLMs you want to use. Not every LLM API Key is required, use what you need.
+
+```bash
+# Required Github Tokens of your own
+GITHUB_AI_TOKEN=
+
+# Optional API Keys
+OPENAI_API_KEY=
+DEEPSEEK_API_KEY=
+ANTHROPIC_API_KEY=
+GEMINI_API_KEY=
+HUGGINGFACE_API_KEY=
+GROQ_API_KEY=
+XAI_API_KEY=
+```
+
+### Start with CLI Mode
+Just run the following command to start the CLI mode. (use shell script `cd path/to/MetaChain && sh playground/cli/metachain_cli.sh`)
+
+```bash
+current_dir=$(dirname "$(readlink -f "$0")")
+
+cd $current_dir
+cd ../.. 
+export DOCKER_WORKPLACE_NAME=workplace
+export EVAL_MODE=True
+export BASE_IMAGES=tjbtech1/metachain:latest
+export COMPLETION_MODEL=claude-3-5-sonnet-20241022
+export DEBUG=False # If you want to see detailed messages of agents' actions, set to True
+export MC_MODE=True # If you want to ignore the retry information of LLM connection, set to True
+export AI_USER=tjb-tech # Your Github username
+
+port=12345 # The port of the agent-interactive environment
+
+python playground/cli/metachain_cli.py --container_name quick_start --model ${COMPLETION_MODEL} --test_pull_name mirror_branch_0207 --debug --port ${port} --git_clone
+```
+
+After the CLI mode is started, you can see the start page of MetaChain: 
+
+<div align="center">
+  <!-- <img src="./assets/metachainnew-intro.pdf" alt="Logo" width="100%"> -->
+  <figure>
+    <img src="./assets/cover.png" alt="Logo" style="max-width: 100%; height: auto;">
+    <figcaption><em>Start Page of MetaChain.</em></figcaption>
+  </figure>
+</div>
+## 🔍 How to Use MetaChain
+
 
 
 
