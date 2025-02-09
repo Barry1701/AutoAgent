@@ -122,20 +122,25 @@ After the CLI mode is started, you can see the start page of MetaChain:
 
 MetaChain have a out-of-the-box multi-agent system, which you could choose `user mode` in the start page to use it. This multi-agent system is a general AI assistant, having the same functionality with **OpenAI's Deep Research** and the comparable performance with it in [GAIA](https://gaia-benchmark-leaderboard.hf.space/) benchmark. 
 
-<div align="center" style="display: flex; justify-content: space-between; gap: 20px;">
-  <figure style="flex: 1; margin: 0;">
-    <img src="./assets/user_mode/select_agent.png" alt="Cover" style="max-width: 32%; height: auto;">
-    <figcaption><em>Use @ to mention the agent you want to use.</em></figcaption>
-  </figure>
-  <figure style="flex: 1; margin: 0;">
-    <img src="./assets/user_mode/input.png" alt="Second" style="max-width: 32%; height: auto;">
-    <figcaption><em>Input your request.</em></figcaption>
-  </figure>
-  <figure style="flex: 1; margin: 0;">
-    <img src="./assets/user_mode/output.png" alt="Third" style="max-width: 32%; height: auto;">
-    <figcaption><em>Agent will give you the response.</em></figcaption>
-  </figure>
-</div>
+<table>
+<tr align="center">
+    <td width="33%">
+        <img src="./assets/user_mode/select_agent.png" alt="Select Agent" width="100%"/>
+        <br>
+        <em>Use @ to mention the agent you want to use.</em>
+    </td>
+    <td width="33%">
+        <img src="./assets/user_mode/input.png" alt="Input" width="100%"/>
+        <br>
+        <em>Input your request.</em>
+    </td>
+    <td width="33%">
+        <img src="./assets/user_mode/output.png" alt="Output" width="100%"/>
+        <br>
+        <em>Agent will give you the response.</em>
+    </td>
+</tr>
+</table>
 
 ### 2. Agent Editor
 
