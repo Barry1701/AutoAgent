@@ -118,11 +118,32 @@ After the CLI mode is started, you can see the start page of MetaChain:
 
 ## 🔍 How to Use MetaChain
 
+### 1. User Mode (SOTA 🏆 Open Deep Research)
 
+MetaChain have a out-of-the-box multi-agent system, which you could choose `user mode` in the start page to use it. This multi-agent system is a general AI assistant, having the same functionality with **OpenAI's Deep Research** and the comparable performance with it in [GAIA](https://gaia-benchmark-leaderboard.hf.space/) benchmark. 
 
+<div align="center" style="display: flex; justify-content: space-between; gap: 20px;">
+  <figure style="flex: 1; margin: 0;">
+    <img src="./assets/user_mode/select_agent.png" alt="Cover" style="max-width: 100%; height: auto;">
+    <figcaption><em>Use @ to mention the agent you want to use.</em></figcaption>
+  </figure>
+  <figure style="flex: 1; margin: 0;">
+    <img src="./assets/user_mode/input.png" alt="Second" style="max-width: 100%; height: auto;">
+    <figcaption><em>Input your request.</em></figcaption>
+  </figure>
+  <figure style="flex: 1; margin: 0;">
+    <img src="./assets/user_mode/output.png" alt="Third" style="max-width: 100%; height: auto;">
+    <figcaption><em>Agent will give you the response.</em></figcaption>
+  </figure>
+</div>
+
+### 2. Agent Editor
+
+### 3. Workflow Editor
+
+## ☑️ Todo List
 
 ## 📖 Documentation
-
 
 
 ## 🤝 How to Join the Community
@@ -136,9 +157,6 @@ through Slack, so this is the best place to start, but we also are happy to have
 
 See more about the community in [COMMUNITY.md](./COMMUNITY.md) or find details on contributing in [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-## 📜 License
-
-Distributed under the MIT License. See [`LICENSE`](./LICENSE) for more information.
 
 ## 🙏 Acknowledgements
 
