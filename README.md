@@ -142,9 +142,9 @@ MetaChain have a out-of-the-box multi-agent system, which you could choose `user
 </tr>
 </table>
 
-### 2. `agent editor` 
+### 2. `agent editor` (Agent Creation without Workflow)
 
-### 3. `workflow editor`
+### 3. `workflow editor` (Agent Creation with Workflow)
 
 ## ☑️ Todo List
 
