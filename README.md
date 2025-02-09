@@ -124,15 +124,15 @@ MetaChain have a out-of-the-box multi-agent system, which you could choose `user
 
 <div align="center" style="display: flex; justify-content: space-between; gap: 20px;">
   <figure style="flex: 1; margin: 0;">
-    <img src="./assets/user_mode/select_agent.png" alt="Cover" style="max-width: 100%; height: auto;">
+    <img src="./assets/user_mode/select_agent.png" alt="Cover" style="max-width: 32%; height: auto;">
     <figcaption><em>Use @ to mention the agent you want to use.</em></figcaption>
   </figure>
   <figure style="flex: 1; margin: 0;">
-    <img src="./assets/user_mode/input.png" alt="Second" style="max-width: 100%; height: auto;">
+    <img src="./assets/user_mode/input.png" alt="Second" style="max-width: 32%; height: auto;">
     <figcaption><em>Input your request.</em></figcaption>
   </figure>
   <figure style="flex: 1; margin: 0;">
-    <img src="./assets/user_mode/output.png" alt="Third" style="max-width: 100%; height: auto;">
+    <img src="./assets/user_mode/output.png" alt="Third" style="max-width: 32%; height: auto;">
     <figcaption><em>Agent will give you the response.</em></figcaption>
   </figure>
 </div>
