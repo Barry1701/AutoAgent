@@ -44,7 +44,7 @@ Welcome to MetaChain! MetaChain is a **Fully-Automated** and highly **Self-Devel
 
 <div class="scrollable">
     <ul>
-      <li><strong>[2025, Feb 10]</strong>: &nbsp;🎉🎉We've released <b>MetaChain!</b>, including framework, evaluation codes and CLI mode!</li>
+      <li><strong>[2025, Feb 10]</strong>: &nbsp;🎉🎉We've released <b>MetaChain!</b>, including framework, evaluation codes and CLI mode! Check our [paper](./assets/paper/metachain_arxiv.pdf) for more details.</li>
     </ul>
 </div>
 
