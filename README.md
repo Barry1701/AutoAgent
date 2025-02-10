@@ -2,8 +2,9 @@
 
 <div align="center">
   <img src="./assets/metachain_logo.svg" alt="Logo" width="200">
-  <h1 align="center">MetaChain: Fully-Automated, Zero-Code Agent Framework</h1>
+  <h1 align="center">MetaChain: Fully-Automated & Zero-Code LLM Agent Framework </h1>
 </div>
+
 
 
 
@@ -116,11 +117,18 @@ After the CLI mode is started, you can see the start page of MetaChain:
   </figure>
 </div>
 
+More features coming soon! 🚀 **Web GUI interface** under development.
+
 ## 🔍 How to Use MetaChain
 
 ### 1. `user mode` (SOTA 🏆 Open Deep Research)
 
 MetaChain have a out-of-the-box multi-agent system, which you could choose `user mode` in the start page to use it. This multi-agent system is a general AI assistant, having the same functionality with **OpenAI's Deep Research** and the comparable performance with it in [GAIA](https://gaia-benchmark-leaderboard.hf.space/) benchmark. 
+
+- 🚀 **High Performance**: Matches Deep Research using Claude 3.5 rather than OpenAI's o3 model.
+- 🔄 **Model Flexibility**: Compatible with any LLM (including Deepseek-R1, Grok, Gemini, etc.)
+- 💰 **Cost-Effective**: Open-source alternative to Deep Research's $200/month subscription
+- 🎯 **User-Friendly**: Easy-to-deploy CLI interface for seamless interaction
 
 <table>
 <tr align="center">
