@@ -48,7 +48,31 @@ Welcome to MetaChain! MetaChain is a **Fully-Automated** and highly **Self-Devel
     </ul>
 </div>
 
+<span id='table-of-contents'/>
+
+## 📑 Table of Contents
+
+* <a href='#features'>✨ Features</a>
+* <a href='#news'>🔥 News</a>
+* <a href='#quick-start'>⚡ Quick Start</a>
+  * <a href='#installation'>Installation</a>
+  * <a href='#api-keys-setup'>API Keys Setup</a>
+  * <a href='#start-with-cli-mode'>Start with CLI Mode</a>
+* <a href='#how-to-use'>🔍 How to Use MetaChain</a>
+  * <a href='#user-mode'>1. User Mode (SOTA Open Deep Research)</a>
+  * <a href='#agent-editor'>2. Agent Editor</a>
+  * <a href='#workflow-editor'>3. Workflow Editor</a>
+* <a href='#todo'>☑️ Todo List</a>
+* <a href='#documentation'>📖 Documentation</a>
+* <a href='#community'>🤝 How to Join the Community</a>
+* <a href='#acknowledgements'>🙏 Acknowledgements</a>
+* <a href='#cite'>🌟 Cite</a>
+
+<span id='quick-start'/>
+
 ## ⚡ Quick Start
+
+<span id='installation'/>
 
 ### Installation
 
@@ -68,6 +92,8 @@ We use Docker to containerize the agent-interactive environment. So please insta
 docker pull tjbtech1/metachain:latest
 ```
 
+<span id='api-keys-setup'/>
+
 ### API Keys Setup
 
 Create a environment variable file, just like `.env.template`, and set the API keys for the LLMs you want to use. Not every LLM API Key is required, use what you need.
@@ -85,6 +111,8 @@ HUGGINGFACE_API_KEY=
 GROQ_API_KEY=
 XAI_API_KEY=
 ```
+
+<span id='start-with-cli-mode'/>
 
 ### Start with CLI Mode
 Just run the following command to start the CLI mode. (use shell script `cd path/to/MetaChain && sh playground/cli/metachain_cli.sh`)
@@ -119,7 +147,11 @@ After the CLI mode is started, you can see the start page of MetaChain:
 
 More features coming soon! 🚀 **Web GUI interface** under development.
 
+<span id='how-to-use'/>
+
 ## 🔍 How to Use MetaChain
+
+<span id='user-mode'/>
 
 ### 1. `user mode` (SOTA 🏆 Open Deep Research)
 
@@ -129,6 +161,7 @@ MetaChain have a out-of-the-box multi-agent system, which you could choose `user
 - 🔄 **Model Flexibility**: Compatible with any LLM (including Deepseek-R1, Grok, Gemini, etc.)
 - 💰 **Cost-Effective**: Open-source alternative to Deep Research's $200/month subscription
 - 🎯 **User-Friendly**: Easy-to-deploy CLI interface for seamless interaction
+- 📁 **File Support**: Handles file uploads for enhanced data interaction
 
 <table>
 <tr align="center">
@@ -149,6 +182,27 @@ MetaChain have a out-of-the-box multi-agent system, which you could choose `user
     </td>
 </tr>
 </table>
+<table>
+<tr align="center">
+    <td width="33%">
+        <img src="./assets/user_mode/4-upload.png" alt="Input" width="100%"/>
+        <br>
+        <em>@Upload_files will help you upload the files.</em>
+    </td>
+    <td width="33%">
+        <img src="./assets/user_mode/5-select.png" alt="Output" width="100%"/>
+        <br>
+        <em>Select the files you want to use.</em>
+    </td>
+    <td width="33%">
+        <img src="./assets/user_mode/6-success.png" alt="Select Agent" width="100%"/>
+        <br>
+        <em>Successfully uploaded the files.</em>
+    </td>
+</tr>
+</table>
+
+<span id='agent-editor'/>
 
 ### 2. `agent editor` (Agent Creation without Workflow)
 
@@ -195,6 +249,8 @@ You can use `agent editor` as shown in the following figure.
 </tr>
 </table>
 
+<span id='workflow-editor'/>
+
 ### 3. `workflow editor` (Agent Creation with Workflow)
 
 You can also create the agent workflows using natural language description with the `workflow editor` mode, as shown in the following figure. (Tips: this mode does not support tool creation temporarily.)
@@ -233,12 +289,27 @@ You can also create the agent workflows using natural language description with 
 </tr>
 </table>
 
+<span id='todo'/>
+
 ## ☑️ Todo List
 
+MetaChain is continuously evolving! Here's what's coming:
 
+- 📊 **More Benchmarks**: Expanding evaluations to **SWE-bench**, **WebArena**, and more
+- 🖥️ **GUI Agent**: Supporting *Computer-Use* agents with GUI interaction
+- 🔧 **Tool Platforms**: Integration with more platforms like **Composio**
+- 🏗️ **Code Sandboxes**: Supporting additional environments like **E2B**
+- 🎨 **Web Interface**: Developing comprehensive GUI for better user experience
+
+Have ideas or suggestions? Feel free to open an issue! Stay tuned for more exciting updates! 🚀
+
+<span id='documentation'/>
 
 ## 📖 Documentation
 
+
+
+<span id='community'/>
 
 ## 🤝 How to Join the Community
 
@@ -251,6 +322,7 @@ through Slack, so this is the best place to start, but we also are happy to have
 
 See more about the community in [COMMUNITY.md](./COMMUNITY.md) or find details on contributing in [CONTRIBUTING.md](./CONTRIBUTING.md).
 
+<span id='acknowledgements'/>
 
 ## 🙏 Acknowledgements
 
@@ -258,8 +330,15 @@ OpenHands is built by a large number of contributors, and every contribution is 
 
 For a list of open source projects and licenses used in OpenHands, please see our [CREDITS.md](./CREDITS.md) file.
 
+<span id='cite'/>
+
 ## 🌟 Cite
 
 ```
 
 ```
+
+
+
+
+

@@ -34,6 +34,7 @@ from rich.panel import Panel
 import re
 from playground.cli.metachain_meta_agent import meta_agent
 from playground.cli.metachain_meta_workflow import meta_workflow
+from playground.cli.file_select import select_and_copy_files
 def get_args(): 
     parser = argparse.ArgumentParser(description="working@tjb-tech")
     parser.add_argument('--container_name', type=str, default='gpu_test')
@@ -107,6 +108,7 @@ def user_mode(model: str, context_variables: dict, debug: bool = True):
     agents = {system_triage_agent.name.replace(' ', '_'): system_triage_agent}
     for agent_name in system_triage_agent.agent_teams.keys():
         agents[agent_name.replace(' ', '_')] = system_triage_agent.agent_teams[agent_name]("placeholder").agent
+    agents["Upload_files"] = "select"
     style = Style.from_dict({
         'bottom-toolbar': 'bg:#333333 #ffffff',
     })
@@ -140,24 +142,35 @@ def user_mode(model: str, context_variables: dict, debug: bool = True):
                 # print(word, end=' ')
                 pass
         print()
-        agent_name = agent.name
-        console.print(f"[bold green][bold magenta]@{agent_name}[/bold magenta] will help you, be patient...[/bold green]")
-        messages.append({"role": "user", "content": query})
-        response = client.run(agent, messages, context_variables, debug=debug)
-        messages.extend(response.messages)
-        model_answer_raw = response.messages[-1]['content']
+        
+        if hasattr(agent, "name"): 
+            agent_name = agent.name
+            console.print(f"[bold green][bold magenta]@{agent_name}[/bold magenta] will help you, be patient...[/bold green]")
+            messages.append({"role": "user", "content": query})
+            response = client.run(agent, messages, context_variables, debug=debug)
+            messages.extend(response.messages)
+            model_answer_raw = response.messages[-1]['content']
 
-        # attempt to parse model_answer
-        if model_answer_raw.startswith('Case resolved'):
-            model_answer = re.findall(r'<solution>(.*?)</solution>', model_answer_raw, re.DOTALL)
-            if len(model_answer) == 0:
+            # attempt to parse model_answer
+            if model_answer_raw.startswith('Case resolved'):
+                model_answer = re.findall(r'<solution>(.*?)</solution>', model_answer_raw, re.DOTALL)
+                if len(model_answer) == 0:
+                    model_answer = model_answer_raw
+                else:
+                    model_answer = model_answer[0]
+            else: 
                 model_answer = model_answer_raw
-            else:
-                model_answer = model_answer[0]
+            console.print(f"[bold green][bold magenta]@{agent_name}[/bold magenta] has finished with the response:\n[/bold green] [bold blue]{model_answer}[/bold blue]")
+            agent = response.agent
+        elif agent == "select": 
+            code_env: DockerEnv = context_variables["code_env"]
+            local_workplace = code_env.local_workplace
+            files_dir = os.path.join(local_workplace, "files")
+            os.makedirs(files_dir, exist_ok=True)
+            select_and_copy_files(files_dir, console)
         else: 
-            model_answer = model_answer_raw
-        console.print(f"[bold green][bold magenta]@{agent_name}[/bold magenta] has finished with the response:\n[/bold green] [bold blue]{model_answer}[/bold blue]")
-        agent = response.agent
+            console.print(f"[bold red]Unknown agent: {agent}[/bold red]")
+
 
 def tool_to_table(tool_dict: dict):
     table = Table(title="Tool List", show_lines=True)
