@@ -24,7 +24,7 @@ Welcome to MetaChain! MetaChain is a **Fully-Automated** and highly **Self-Devel
 ## ✨Key Features
 
 * 🏆 Top Performer on the GAIA Benchmark
-MetaChain has secured the **#1** spot among open-sourced methods, delivering comparable performance to **OOpenAI's Deep Research**O.
+</br>MetaChain has ranked the **#1** spot among open-sourced methods, delivering comparable performance to **OOpenAI's Deep Research**O.
 
 * 📚 Agentic-RAG with Native Self-Managing Vector Database
 * MetaChain equipped with a native self-managing vector database, outperforms industry-leading solutions like **LangChain**. 
