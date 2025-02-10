@@ -167,12 +167,12 @@ def meta_workflow(model: str, context_variables: dict, debug: bool = True):
                 requirements = query
                 workflow_form, output_xml_form, messages = workflow_profiling(workflow_former, client, messages, context_variables, requirements, debug)
                 if workflow_form is None:
-                    console.print(f"[bold red]The workflow form is not created successfully, please modify your requirements again.[/bold red]")
+                    console.print(f"[bold red][bold magenta]@{agent_name}[/bold magenta] has not created workflow form successfully, please modify your requirements again.[/bold red]")
                     last_message = "Tell me what do you want to create with `Workflow Chain`?"
                     continue
                 agent = workflow_creator_agent
                 context_variables["workflow_form"] = workflow_form
-                console.print(f"[bold green]The workflow form is created successfully. [/bold green]")
+                console.print(f"[bold green][bold magenta]@{agent_name}[/bold magenta] has created workflow form successfully with the following details:\n[/bold green][bold blue]{output_xml_form}[/bold blue]")
                 last_message = "It is time to create the desired workflow, do you have any suggestions for creating the workflow?"
             case "Workflow Creator Agent":
                 suggestions = query
@@ -184,10 +184,10 @@ def meta_workflow(model: str, context_variables: dict, debug: bool = True):
                 task = default_value if not task.strip() else task
                 agent_response, messages = workflow_editing(workflow_creator_agent, client, messages, context_variables, workflow_form, output_xml_form, requirements, task, debug, suggestions)
                 if agent_response.startswith("Case not resolved"):
-                    console.print(f"[bold red]The workflow is not created or tested successfully, please try again.[/bold red]")
+                    console.print(f"[bold red][bold magenta]@{agent_name}[/bold magenta] has not created workflow successfully with the following error: {agent_response}[/bold red]")
                     agent = workflow_creator_agent
                 else:
-                    console.print(f"[bold green]The workflow is created successfully. [/bold green]")
+                    console.print(f"[bold green][bold magenta]@{agent_name}[/bold magenta] has created workflow successfully with the following details:\n[/bold green][bold blue]{agent_response}[/bold blue]")
                     last_message = "Tell me what do you want to create with `Workflow Chain` next?"
     
     

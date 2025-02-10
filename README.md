@@ -26,7 +26,7 @@ Welcome to MetaChain! MetaChain is a **Fully-Automated** and highly **Self-Devel
 * **Top 1** 🏆 open-sourced method in GAIA benchmark, with performance comparable to **OpenAI's Deep Research**.
 * **Top 1** 🏆 Agentic-RAG with native self-managing vector database, outperforming **LangChain**. 
 * Create ready-to-use **tools**, **agents** and **workflows** using natural language **only**.
-* Support for **ALL** LLMs (OpenAI, Anthropic, vLLM, Grok, Huggingface ...)
+* Support for **ALL** LLMs (OpenAI, Anthropic, Deepseek, vLLM, Grok, Huggingface ...)
 * Support both **function-calling** and **ReAct**.
 * Dynamic, extensible, and lightweight - your **personal** agent system.
 * Try it now!
@@ -152,7 +152,86 @@ MetaChain have a out-of-the-box multi-agent system, which you could choose `user
 
 ### 2. `agent editor` (Agent Creation without Workflow)
 
+The most distinctive feature of MetaChain is its natural language customization capability. Unlike other agent frameworks, MetaChain allows you to create tools, agents, and workflows using natural language alone. Simply choose `agent editor` or `workflow editor` mode to start your journey of building agents through conversations.
+
+You can use `agent editor` as shown in the following figure.
+
+<table>
+<tr align="center">
+    <td width="33%">
+        <img src="./assets/agent_editor/1-requirement.png" alt="requirement" width="100%"/>
+        <br>
+        <em>Input what kind of agent you want to create.</em>
+    </td>
+    <td width="33%">
+        <img src="./assets/agent_editor/2-profiling.png" alt="profiling" width="100%"/>
+        <br>
+        <em>Automated agent profiling.</em>
+    </td>
+    <td width="33%">
+        <img src="./assets/agent_editor/3-profiles.png" alt="profiles" width="100%"/>
+        <br>
+        <em>Output the agent profiles.</em>
+    </td>
+</tr>
+</table>
+<table>
+<tr align="center">
+    <td width="33%">
+        <img src="./assets/agent_editor/4-tools.png" alt="tools" width="100%"/>
+        <br>
+        <em>Create the desired tools.</em>
+    </td>
+    <td width="33%">
+        <img src="./assets/agent_editor/5-task.png" alt="task" width="100%"/>
+        <br>
+        <em>Input what do you want to complete with the agent. (Optional)</em>
+    </td>
+    <td width="33%">
+        <img src="./assets/agent_editor/6-output-next.png" alt="output" width="100%"/>
+        <br>
+        <em>Create the desired agent(s) and go to the next step.</em>
+    </td>
+</tr>
+</table>
+
 ### 3. `workflow editor` (Agent Creation with Workflow)
+
+You can also create the agent workflows using natural language description with the `workflow editor` mode, as shown in the following figure. (Tips: this mode does not support tool creation temporarily.)
+
+<table>
+<tr align="center">
+    <td width="33%">
+        <img src="./assets/workflow_editor/1-requirement.png" alt="requirement" width="100%"/>
+        <br>
+        <em>Input what kind of workflow you want to create.</em>
+    </td>
+    <td width="33%">
+        <img src="./assets/workflow_editor/2-profiling.png" alt="profiling" width="100%"/>
+        <br>
+        <em>Automated workflow profiling.</em>
+    </td>
+    <td width="33%">
+        <img src="./assets/workflow_editor/3-profiles.png" alt="profiles" width="100%"/>
+        <br>
+        <em>Output the workflow profiles.</em>
+    </td>
+</tr>
+</table>
+<table>
+<tr align="center">
+    <td width="33%">
+        <img src="./assets/workflow_editor/4-task.png" alt="task" width="100%"/>
+        <br>
+        <em>Input what do you want to complete with the workflow. (Optional)</em>
+    </td>
+    <td width="33%">
+        <img src="./assets/workflow_editor/5-output-next.png" alt="output" width="100%"/>
+        <br>
+        <em>Create the desired workflow(s) and go to the next step.</em>
+    </td>
+</tr>
+</table>
 
 ## ☑️ Todo List
 

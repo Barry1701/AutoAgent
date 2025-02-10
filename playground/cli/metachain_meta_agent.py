@@ -115,7 +115,7 @@ def agent_editing(agent_creator_agent, client, messages, context_variables, agen
         """
         Use this tools when the desired agent(s) is created and tested successfully. You can NOT use this tool if the agent(s) is not created or tested successfully by running the agent(s).
         """
-        return f"Case resolved. The desired agent(s) is created and tested successfully.    : {task_response}"
+        return f"Case resolved. The desired agent(s) is created and tested successfully. : {task_response}"
     def case_not_resolved(task_response: str, context_variables: dict):
         """
         Use this tools when you encounter irresistible errors after trying your best with multiple attempts for creating the desired agent(s). You can NOT use this tool before you have tried your best.
@@ -215,24 +215,24 @@ def meta_agent(model: str, context_variables: dict, debug: bool = True):
                 requirements = query
                 agent_form, output_xml_form, messages = agent_profiling(agent_former, client, messages, context_variables, requirements, debug)
                 if agent_form is None:
-                    console.print(f"[bold red]The agent form is not created successfully, please modify your requirements again.[/bold red]")
+                    console.print(f"[bold red][bold magenta]@{agent_name}[/bold magenta] has not created agent form successfully, please modify your requirements again.[/bold red]")
                     last_message = "Tell me what do you want to create with `Agent Chain`?"
                     continue
                 
                 agent = tool_editor_agent
-                console.print(f"[bold green]The agent form is created successfully. [/bold green]")
+                console.print(f"[bold green][bold magenta]@{agent_name}[/bold magenta] has created agent form successfully with the following details:\n[/bold green][bold blue]{output_xml_form}[/bold blue]")
                 last_message = "It is time to create the desired tools, do you have any suggestions for creating the tools?"
             case 'Tool Editor Agent':
                 suggestions = query
                 tool_response, messages = tool_editing(tool_editor_agent, client, messages, context_variables, agent_form, output_xml_form, debug, suggestions)
                 if tool_response.startswith("Case not resolved"):
-                    console.print(f"[bold red]Some desired tools are not created or tested successfully, please try again.[/bold red]")
+                    console.print(f"[bold red][bold magenta]@{agent_name}[/bold magenta] has not created tools successfully with the following error: {tool_response}[/bold red]")
                     agent = tool_editor_agent
                     last_message = "The tools are not created successfully, do you have any suggestions for creating the tools?"
                     continue
                 elif tool_response.startswith("Case resolved"):
                     agent = agent_creator_agent
-                    console.print(f"[bold green]The tools are created successfully. [/bold green]")
+                    console.print(f"[bold green][bold magenta]@{agent_name}[/bold magenta] has created tools successfully with the following details:\n[/bold green][bold blue]{tool_response}[/bold blue]")
                     last_message = "It is time to create the desired agent(s), do you have any suggestions for creating the agent(s)?"
                 else: 
                     raise ValueError(f"Unknown tool response: {tool_response}")
@@ -247,10 +247,10 @@ def meta_agent(model: str, context_variables: dict, debug: bool = True):
                 task = default_value if not task.strip() else task
                 agent_response, messages = agent_editing(agent_creator_agent, client, messages, context_variables, agent_form, output_xml_form, requirements, task, debug, suggestions)
                 if agent_response.startswith("Case not resolved"):
-                    console.print(f"[bold red]The agent(s) is not created or tested successfully, please try again.[/bold red]")
+                    console.print(f"[bold red][bold magenta]@{agent_name}[/bold magenta] has not created agent(s) successfully with the following error: {agent_response}[/bold red]")
                     agent = agent_creator_agent
                     last_message = "The agent(s) are not created successfully, do you have any suggestions for creating the agent(s)?"
                     continue
                 else:
-                    console.print(f"[bold green]The agent(s) are created successfully. [/bold green]")
+                    console.print(f"[bold green][bold magenta]@{agent_name}[/bold magenta] has created agent(s) successfully with the following details:\n[/bold green][bold blue]{agent_response}[/bold blue]")
                     last_message = "Tell me what do you want to create with `Agent Chain`?"
