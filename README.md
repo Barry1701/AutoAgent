@@ -221,12 +221,12 @@ You can also create the agent workflows using natural language description with 
 <table>
 <tr align="center">
     <td width="33%">
-        <img src="./assets/workflow_editor/4-task.png" alt="task" width="100%"/>
+        <img src="./assets/workflow_editor/4-task.png" alt="task" width="66%"/>
         <br>
         <em>Input what do you want to complete with the workflow. (Optional)</em>
     </td>
     <td width="33%">
-        <img src="./assets/workflow_editor/5-output-next.png" alt="output" width="100%"/>
+        <img src="./assets/workflow_editor/5-output-next.png" alt="output" width="66%"/>
         <br>
         <em>Create the desired workflow(s) and go to the next step.</em>
     </td>
