@@ -323,7 +323,17 @@ cd path/to/MetaChain && python evaluation/gaia/get_score.py
 
 ### Agentic-RAG
 
+For the Agentic-RAG task, you can run the following command to run the inference.
 
+Step1. Turn to https://huggingface.co/datasets/yixuantt/MultiHopRAG and download it. Save them to your datapath.
+
+Step2. Run the following command to run the inference.
+
+```bash
+cd path/to/MetaChain && sh evaluation/multihoprag/scripts/run_rag.sh
+```
+
+Step3. The result will be saved in the `evaluation/multihoprag/result.json`.
 
 <span id='documentation'/>
 
