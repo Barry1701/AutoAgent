@@ -2,7 +2,7 @@
 
 <div align="center">
   <img src="./assets/metachain_logo.svg" alt="Logo" width="200">
-  <h1 align="center">MetaChain: Fully-Automated & Zero-Code LLM Agent Framework </h1>
+  <h1 align="center">MetaChain: Fully-Automated & Zero-Code</br> LLM Agent Framework </h1>
 </div>
 
 
@@ -21,15 +21,27 @@
 
 Welcome to MetaChain! MetaChain is a **Fully-Automated** and highly **Self-Developing** framework that enables users to create and deploy LLM agents through **Natural Language Alone**. 
 
-## ✨Features
+## ✨Key Features
 
-* **Top 1** 🏆 open-sourced method in GAIA benchmark, with performance comparable to **OpenAI's Deep Research**.
-* **Top 1** 🏆 Agentic-RAG with native self-managing vector database, outperforming **LangChain**. 
-* Create ready-to-use **tools**, **agents** and **workflows** using natural language **only**.
-* Support for **ALL** LLMs (OpenAI, Anthropic, Deepseek, vLLM, Grok, Huggingface ...)
-* Support both **function-calling** and **ReAct**.
-* Dynamic, extensible, and lightweight - your **personal** agent system.
-* Try it now!
+* 🏆 Top Performer on the GAIA Benchmark
+</br>MetaChain has ranked the **#1** spot among open-sourced methods, delivering comparable performance to **OOpenAI's Deep Research**O.
+
+* 📚 Agentic-RAG with Native Self-Managing Vector Database
+</br>MetaChain equipped with a native self-managing vector database, outperforms industry-leading solutions like **LangChain**. 
+
+* ✨ Agent and Workflow Create with Ease
+</br>MetaChain leverages natural language to effortlessly build ready-to-use **tools**, **agents** and **workflows** - no coding required.
+
+* 🌐 Universal LLM Support
+</br>MetaChain seamlessly integrates with **A Wide Range** of LLMs (e.g., OpenAI, Anthropic, Deepseek, vLLM, Grok, Huggingface ...)
+
+* 🔀 Flexible Interaction 
+</br>Benefit from support for both **function-calling** and **ReAct** interaction modes.
+
+* 🤖 Dynamic, Extensible, Lightweight 
+</br>MetaChain is your **Personal AI Assistant**, designed to be dynamic, extensible, customized, and lightweight.
+
+🚀 Unlock the Future of LLM Agents. Try 🔥MetaChain🔥 Now!
 
 <div align="center">
   <!-- <img src="./assets/metachainnew-intro.pdf" alt="Logo" width="100%"> -->
