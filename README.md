@@ -2,7 +2,7 @@
 
 <div align="center">
   <img src="./assets/metachain_logo.svg" alt="Logo" width="200">
-  <h1 align="center">MetaChain: Fully-Automated & Zero-Code LLM Agent Framework </h1>
+  <h1 align="center">MetaChain: Fully-Automated & Zero-Code</br> LLM Agent Framework </h1>
 </div>
 
 
