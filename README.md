@@ -59,12 +59,13 @@ Welcome to MetaChain! MetaChain is a **Fully-Automated** and highly **Self-Devel
   * <a href='#api-keys-setup'>API Keys Setup</a>
   * <a href='#start-with-cli-mode'>Start with CLI Mode</a>
 * <a href='#how-to-use'>🔍 How to Use MetaChain</a>
-  * <a href='#user-mode'>1. User Mode (SOTA Open Deep Research)</a>
-  * <a href='#agent-editor'>2. Agent Editor</a>
-  * <a href='#workflow-editor'>3. Workflow Editor</a>
+  * <a href='#user-mode'>1. `user mode` (SOTA 🏆 Open Deep Research)</a>
+  * <a href='#agent-editor'>2. `agent editor` (Agent Creation without Workflow)</a>
+  * <a href='#workflow-editor'>3. `workflow editor` (Agent Creation with Workflow)</a>
 * <a href='#todo'>☑️ Todo List</a>
+* <a href='#reproduce'>🔬 How To Reproduce the Results in the Paper</a>
 * <a href='#documentation'>📖 Documentation</a>
-* <a href='#community'>🤝 How to Join the Community</a>
+* <a href='#community'>🤝 Join the Community</a>
 * <a href='#acknowledgements'>🙏 Acknowledgements</a>
 * <a href='#cite'>🌟 Cite</a>
 
@@ -303,39 +304,65 @@ MetaChain is continuously evolving! Here's what's coming:
 
 Have ideas or suggestions? Feel free to open an issue! Stay tuned for more exciting updates! 🚀
 
+<span id='reproduce'/>
+
+## 🔬 How To Reproduce the Results in the Paper
+
+### GAIA Benchmark
+For the GAIA benchmark, you can run the following command to run the inference.
+
+```bash
+cd path/to/MetaChain && sh evaluation/gaia/scripts/run_infer.sh
+```
+
+For the evaluation, you can run the following command.
+
+```bash
+cd path/to/MetaChain && python evaluation/gaia/get_score.py
+```
+
+### Agentic-RAG
+
+
+
 <span id='documentation'/>
 
 ## 📖 Documentation
 
-
+A more detailed documentation is coming soon 🚀, and we will update in the [Documentation](https://metachain-ai.github.io/docs) page.
 
 <span id='community'/>
 
-## 🤝 How to Join the Community
+## 🤝 Join the Community
 
-OpenHands is a community-driven project, and we welcome contributions from everyone. We do most of our communication
-through Slack, so this is the best place to start, but we also are happy to have you contact us on Discord or Github:
+We want to build a community for MetaChain, and we welcome everyone to join us. You can join our community by:
 
-- [Join our Slack workspace]() - Here we talk about research, architecture, and future development.
-- [Join our Discord server]() - This is a community-run server for general discussion, questions, and feedback.
+- [Join our Slack workspace](https://join.slack.com/t/metachain-workspace/shared_invite/zt-2zibtmutw-v7xOJObBf9jE2w3x7nctFQ) - Here we talk about research, architecture, and future development.
+- [Join our Discord server](https://discord.gg/z68KRvwB) - This is a community-run server for general discussion, questions, and feedback. 
 - [Read or post Github Issues](https://github.com/HKUDS/MetaChain/issues) - Check out the issues we're working on, or add your own ideas.
 
-See more about the community in [COMMUNITY.md](./COMMUNITY.md) or find details on contributing in [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 <span id='acknowledgements'/>
 
 ## 🙏 Acknowledgements
 
-OpenHands is built by a large number of contributors, and every contribution is greatly appreciated! We also build upon other open source projects, and we are deeply thankful for their work.
+Rome wasn't built in a day. MetaChain stands on the shoulders of giants, and we are deeply grateful for the outstanding work that came before us. Our framework architecture draws inspiration from [OpenAI Swarm](https://github.com/openai/swarm), while our user mode's three-agent design benefits from [Magentic-one](https://github.com/microsoft/autogen/tree/main/python/packages/autogen-magentic-one)'s insights. We've also learned from [OpenHands](https://github.com/All-Hands-AI/OpenHands) for documentation structure and many other excellent projects for agent-environment interaction design, among others. We express our sincere gratitude and respect to all these pioneering works that have been instrumental in shaping MetaChain.
 
-For a list of open source projects and licenses used in OpenHands, please see our [CREDITS.md](./CREDITS.md) file.
 
 <span id='cite'/>
 
 ## 🌟 Cite
 
-```
-
+```tex
+@misc{metachain,
+      title={{MetaChain: A Fully-Automated and Zero-Code Framework for LLM Agents}},
+      author={Jiabin Tang, Tianyu Fan, Chao Huang},
+      year={2025},
+      eprint={202502.xxxxx},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2502.xxxxx},
+}
 ```
 
 
