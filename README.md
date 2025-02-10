@@ -149,7 +149,7 @@ export NON_FN_CALL=False
 
 port=12345 # The port of the agent-interactive environment
 
-python playground/cli/metachain_cli.py --container_name quick_start --model ${COMPLETION_MODEL} --test_pull_name mirror_branch_0207 --debug --port ${port} --git_clone
+python playground/cli/metachain_cli.py --container_name quick_start --model ${COMPLETION_MODEL} --test_pull_name quick_start_pull --debug --port ${port} --git_clone
 ```
 
 After the CLI mode is started, you can see the start page of MetaChain: 
