@@ -27,19 +27,19 @@ Welcome to MetaChain! MetaChain is a **Fully-Automated** and highly **Self-Devel
 </br>MetaChain has ranked the **#1** spot among open-sourced methods, delivering comparable performance to **OOpenAI's Deep Research**O.
 
 * 📚 Agentic-RAG with Native Self-Managing Vector Database
-* MetaChain equipped with a native self-managing vector database, outperforms industry-leading solutions like **LangChain**. 
+</br>MetaChain equipped with a native self-managing vector database, outperforms industry-leading solutions like **LangChain**. 
 
 * ✨ Agent and Workflow Create with Ease
-* MetaChain leverages natural language to effortlessly build ready-to-use **tools**, **agents** and **workflows** - no coding required.
+</br>MetaChain leverages natural language to effortlessly build ready-to-use **tools**, **agents** and **workflows** - no coding required.
 
 * 🌐 Universal LLM Support
-* MetaChain seamlessly integrates with **A Wide Range** of LLMs (e.g., OpenAI, Anthropic, Deepseek, vLLM, Grok, Huggingface ...)
+</br>MetaChain seamlessly integrates with **A Wide Range** of LLMs (e.g., OpenAI, Anthropic, Deepseek, vLLM, Grok, Huggingface ...)
 
 * 🔀 Flexible Interaction 
-* Benefit from support for both **function-calling** and **ReAct** interaction modes.
+</br>Benefit from support for both **function-calling** and **ReAct** interaction modes.
 
 * 🤖 Dynamic, Extensible, Lightweight 
-MetaChain is your **Personal AI Assistant**, designed to be dynamic, extensible, customized, and lightweight.
+</br>MetaChain is your **Personal AI Assistant**, designed to be dynamic, extensible, customized, and lightweight.
 
 🚀 Unlock the Future of LLM Agents. Try 🔥MetaChain🔥 Now!
 
