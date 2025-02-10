@@ -116,7 +116,7 @@ XAI_API_KEY=
 <span id='start-with-cli-mode'/>
 
 ### Start with CLI Mode
-Just run the following command to start the CLI mode. (use shell script `cd path/to/MetaChain && sh playground/cli/metachain_cli.sh`)
+Just run the following command to start the CLI mode. (use shell script `cd path/to/MetaChain && sh playground/cli/metachain_cli.sh`). The `COMPLETION_MODEL` is the name of the LLM you want to use. Note that we use [LiteLLM](https://github.com/BerriAI/litellm) as the LLM wrapper, so you should set the `COMPLETION_MODEL` according to the [LiteLLM](https://github.com/BerriAI/litellm) documentation. 
 
 ```bash
 current_dir=$(dirname "$(readlink -f "$0")")
@@ -130,6 +130,10 @@ export COMPLETION_MODEL=claude-3-5-sonnet-20241022
 export DEBUG=False # If you want to see detailed messages of agents' actions, set to True
 export MC_MODE=True # If you want to ignore the retry information of LLM connection, set to True
 export AI_USER=tjb-tech # Your Github username
+
+export FN_CALL=True
+export ADD_USER=False
+export NON_FN_CALL=False
 
 port=12345 # The port of the agent-interactive environment
 
@@ -145,6 +149,20 @@ After the CLI mode is started, you can see the start page of MetaChain:
     <figcaption><em>Start Page of MetaChain.</em></figcaption>
   </figure>
 </div>
+
+### Tips
+
+#### Import browser cookies to browser environment
+
+You can import the browser cookies to the browser environment to let the agent better access some specific websites. For more details, please refer to the [cookies](./metachain/environment/cookie_json/README.md) folder.
+
+#### Add your own API keys for third-party Tool Platforms
+
+If you want to create tools from the third-party tool platforms, such as RapidAPI, you should subscribe tools from the platform and add your own API keys by running [process_tool_docs.py](./process_tool_docs.py). 
+
+```bash
+python process_tool_docs.py
+```
 
 More features coming soon! 🚀 **Web GUI interface** under development.
 
