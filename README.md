@@ -14,7 +14,7 @@
   <a href="https://discord.gg/z68KRvwB"><img src="https://img.shields.io/badge/Discord-Join%20Us-purple?logo=discord&logoColor=white&style=for-the-badge" alt="Join our Discord community"></a>
   <br/>
   <a href="https://metachain-ai.github.io/docs"><img src="https://img.shields.io/badge/Documentation-000?logo=googledocs&logoColor=FFE165&style=for-the-badge" alt="Check out the documentation"></a>
-  <a href="https://github.com/HKUDS/MetaChain/blob/main/assets/paper/metachain_arxiv.pdf"><img src="https://img.shields.io/badge/Paper%20on%20Arxiv-000?logoColor=FFE165&logo=arxiv&style=for-the-badge" alt="Paper"></a>
+  <a href="https://arxiv.org/abs/2502.05957"><img src="https://img.shields.io/badge/Paper%20on%20Arxiv-000?logoColor=FFE165&logo=arxiv&style=for-the-badge" alt="Paper"></a>
   <a href="https://gaia-benchmark-leaderboard.hf.space/"><img src="https://img.shields.io/badge/GAIA%20Benchmark-000?logoColor=FFE165&logo=huggingface&style=for-the-badge" alt="Evaluation Benchmark Score"></a>
   <hr>
 </div>
@@ -56,10 +56,9 @@ Welcome to MetaChain! MetaChain is a **Fully-Automated** and highly **Self-Devel
 
 <div class="scrollable">
     <ul>
-      <li><strong>[2025, Feb 10]</strong>: &nbsp;🎉🎉We've released <b>MetaChain!</b>, including framework, evaluation codes and CLI mode! Check our <a href="./assets/paper/metachain_arxiv.pdf">paper</a> for more details.</li>
+      <li><strong>[2025, Feb 10]</strong>: &nbsp;🎉🎉We've released <b>MetaChain!</b>, including framework, evaluation codes and CLI mode! Check our <a href="https://arxiv.org/abs/2502.05957">paper</a> for more details.</li>
     </ul>
 </div>
-
 <span id='table-of-contents'/>
 
 ## 📑 Table of Contents
@@ -398,10 +397,10 @@ Rome wasn't built in a day. MetaChain stands on the shoulders of giants, and we 
       title={{MetaChain: A Fully-Automated and Zero-Code Framework for LLM Agents}},
       author={Jiabin Tang, Tianyu Fan, Chao Huang},
       year={2025},
-      eprint={202502.xxxxx},
+      eprint={202502.05957},
       archivePrefix={arXiv},
       primaryClass={cs.AI},
-      url={https://arxiv.org/abs/2502.xxxxx},
+      url={https://arxiv.org/abs/2502.05957},
 }
 ```
 
