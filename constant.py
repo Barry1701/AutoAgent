@@ -31,7 +31,7 @@ DEBUG = str_to_bool(os.getenv('DEBUG', True))
 DEFAULT_LOG = str_to_bool(os.getenv('DEFAULT_LOG', False))
 LOG_PATH = os.getenv('LOG_PATH', None)
 EVAL_MODE = str_to_bool(os.getenv('EVAL_MODE', False))
-BASE_IMAGES = os.getenv('BASE_IMAGES', "tjb-gaia-bookworm:v2")
+BASE_IMAGES = os.getenv('BASE_IMAGES', "tjbtech1/gaia-bookworm:v2")
 
 COMPLETION_MODEL = os.getenv('COMPLETION_MODEL', "claude-3-5-haiku-20241022")
 EMBEDDING_MODEL = os.getenv('EMBEDDING_MODEL', "text-embedding-3-small")
