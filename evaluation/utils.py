@@ -8,7 +8,7 @@ import pandas as pd
 import json
 from typing import Callable, Awaitable
 from tqdm import tqdm
-from metachain.logger import MetaChainLogger, LoggerManager
+from autoagent.logger import MetaChainLogger, LoggerManager
 import multiprocessing as mp
 import psutil
 import traceback

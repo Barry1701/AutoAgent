@@ -1,15 +1,15 @@
-from metachain import MetaChain
-from metachain.util import ask_text, single_select_menu, print_markdown, debug_print, UserCompleter
+from autoagent import MetaChain
+from autoagent.util import ask_text, single_select_menu, print_markdown, debug_print, UserCompleter
 from prompt_toolkit import PromptSession
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.styles import Style
-from metachain.logger import LoggerManager, MetaChainLogger 
+from autoagent.logger import LoggerManager, MetaChainLogger 
 from rich.console import Console
 from rich.panel import Panel
-from metachain.agents.meta_agent.workflow_former import get_workflow_former_agent
-from metachain.agents.meta_agent.workflow_creator import get_workflow_creator_agent
+from autoagent.agents.meta_agent.workflow_former import get_workflow_former_agent
+from autoagent.agents.meta_agent.workflow_creator import get_workflow_creator_agent
 import re
-from metachain.agents.meta_agent.worklow_form_complie import parse_workflow_form, WorkflowForm
+from autoagent.agents.meta_agent.worklow_form_complie import parse_workflow_form, WorkflowForm
 
 def workflow_profiling(workflow_former, client, messages, context_variables, requirements, debug):
     messages.append({"role": "user", "content": requirements + """

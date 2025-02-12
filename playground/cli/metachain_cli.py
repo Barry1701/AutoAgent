@@ -1,9 +1,9 @@
 from constant import DOCKER_WORKPLACE_NAME
-from metachain.io_utils import read_yaml_file, get_md5_hash_bytext, read_file
-from metachain.environment.utils import setup_metachain
-from metachain.types import Response
-from metachain import MetaChain
-from metachain.util import ask_text, single_select_menu, print_markdown, debug_print, UserCompleter
+from autoagent.io_utils import read_yaml_file, get_md5_hash_bytext, read_file
+from autoagent.environment.utils import setup_metachain
+from autoagent.types import Response
+from autoagent import MetaChain
+from autoagent.util import ask_text, single_select_menu, print_markdown, debug_print, UserCompleter
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.formatted_text import HTML
@@ -12,19 +12,19 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 import json
 import argparse
 from datetime import datetime
-from metachain.agents.meta_agent import tool_editor, agent_editor
-from metachain.tools.meta.edit_tools import list_tools
-from metachain.tools.meta.edit_agents import list_agents
+from autoagent.agents.meta_agent import tool_editor, agent_editor
+from autoagent.tools.meta.edit_tools import list_tools
+from autoagent.tools.meta.edit_agents import list_agents
 from loop_utils.font_page import MC_LOGO, version_table, NOTES, GOODBYE_LOGO
 from rich.live import Live
-from metachain.environment.docker_env import DockerEnv, DockerConfig, check_container_ports
-from metachain.environment.browser_env import BrowserEnv
-from metachain.environment.markdown_browser import RequestsMarkdownBrowser
+from autoagent.environment.docker_env import DockerEnv, DockerConfig, check_container_ports
+from autoagent.environment.browser_env import BrowserEnv
+from autoagent.environment.markdown_browser import RequestsMarkdownBrowser
 from evaluation.utils import update_progress, check_port_available, run_evaluation, clean_msg
 import os
 import os.path as osp
-from metachain.agents import get_system_triage_agent
-from metachain.logger import LoggerManager, MetaChainLogger 
+from autoagent.agents import get_system_triage_agent
+from autoagent.logger import LoggerManager, MetaChainLogger 
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.table import Table
@@ -225,7 +225,7 @@ def main(args):
         progress.update(task, description="[cyan]Creating environment...[/cyan]\n")
         code_env, web_env, file_env = create_environment(docker_config)
         
-        progress.update(task, description="[cyan]Setting up metachain...[/cyan]\n")
+        progress.update(task, description="[cyan]Setting up autoagent...[/cyan]\n")
         setup_metachain(workplace_name=docker_config.workplace_name, env=code_env)
     
     clear_screen()

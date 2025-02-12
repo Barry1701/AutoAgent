@@ -1,16 +1,16 @@
-from metachain import MetaChain
-from metachain.util import UserCompleter
+from autoagent import MetaChain
+from autoagent.util import UserCompleter
 from prompt_toolkit import PromptSession
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.styles import Style
-from metachain.logger import LoggerManager, MetaChainLogger 
+from autoagent.logger import LoggerManager, MetaChainLogger 
 from rich.console import Console
 from rich.panel import Panel
-from metachain.agents.meta_agent.agent_former import get_agent_former_agent 
-from metachain.agents.meta_agent.tool_editor import get_tool_editor_agent
-from metachain.agents.meta_agent.agent_creator import get_agent_creator_agent
+from autoagent.agents.meta_agent.agent_former import get_agent_former_agent 
+from autoagent.agents.meta_agent.tool_editor import get_tool_editor_agent
+from autoagent.agents.meta_agent.agent_creator import get_agent_creator_agent
 import re
-from metachain.agents.meta_agent.form_complie import parse_agent_form
+from autoagent.agents.meta_agent.form_complie import parse_agent_form
 
 
 def extract_agents_content(text):
