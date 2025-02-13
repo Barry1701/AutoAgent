@@ -2,7 +2,7 @@
 
 <div align="center">
   <img src="./assets/metachain_logo.svg" alt="Logo" width="200">
-  <h1 align="center">MetaChain: Fully-Automated & Zero-Code LLM Agent Framework </h1>
+  <h1 align="center">MetaChain: Fully-Automated & Zero-Code</br> LLM Agent Framework </h1>
 </div>
 
 
@@ -14,22 +14,34 @@
   <a href="https://discord.gg/z68KRvwB"><img src="https://img.shields.io/badge/Discord-Join%20Us-purple?logo=discord&logoColor=white&style=for-the-badge" alt="Join our Discord community"></a>
   <br/>
   <a href="https://metachain-ai.github.io/docs"><img src="https://img.shields.io/badge/Documentation-000?logo=googledocs&logoColor=FFE165&style=for-the-badge" alt="Check out the documentation"></a>
-  <a href="#"><img src="https://img.shields.io/badge/Paper%20on%20Arxiv-000?logoColor=FFE165&logo=arxiv&style=for-the-badge" alt="Paper"></a>
+  <a href="https://arxiv.org/abs/2502.05957"><img src="https://img.shields.io/badge/Paper%20on%20Arxiv-000?logoColor=FFE165&logo=arxiv&style=for-the-badge" alt="Paper"></a>
   <a href="https://gaia-benchmark-leaderboard.hf.space/"><img src="https://img.shields.io/badge/GAIA%20Benchmark-000?logoColor=FFE165&logo=huggingface&style=for-the-badge" alt="Evaluation Benchmark Score"></a>
   <hr>
 </div>
 
 Welcome to MetaChain! MetaChain is a **Fully-Automated** and highly **Self-Developing** framework that enables users to create and deploy LLM agents through **Natural Language Alone**. 
 
-## ✨Features
+## ✨Key Features
 
-* **Top 1** 🏆 open-sourced method in GAIA benchmark, with performance comparable to **OpenAI's Deep Research**.
-* **Top 1** 🏆 Agentic-RAG with native self-managing vector database, outperforming **LangChain**. 
-* Create ready-to-use **tools**, **agents** and **workflows** using natural language **only**.
-* Support for **ALL** LLMs (OpenAI, Anthropic, Deepseek, vLLM, Grok, Huggingface ...)
-* Support both **function-calling** and **ReAct**.
-* Dynamic, extensible, and lightweight - your **personal** agent system.
-* Try it now!
+* 🏆 Top Performer on the GAIA Benchmark
+</br>MetaChain has ranked the **#1** spot among open-sourced methods, delivering comparable performance to **OpenAI's Deep Research**.
+
+* 📚 Agentic-RAG with Native Self-Managing Vector Database
+</br>MetaChain equipped with a native self-managing vector database, outperforms industry-leading solutions like **LangChain**. 
+
+* ✨ Agent and Workflow Create with Ease
+</br>MetaChain leverages natural language to effortlessly build ready-to-use **tools**, **agents** and **workflows** - no coding required.
+
+* 🌐 Universal LLM Support
+</br>MetaChain seamlessly integrates with **A Wide Range** of LLMs (e.g., OpenAI, Anthropic, Deepseek, vLLM, Grok, Huggingface ...)
+
+* 🔀 Flexible Interaction 
+</br>Benefit from support for both **function-calling** and **ReAct** interaction modes.
+
+* 🤖 Dynamic, Extensible, Lightweight 
+</br>MetaChain is your **Personal AI Assistant**, designed to be dynamic, extensible, customized, and lightweight.
+
+🚀 Unlock the Future of LLM Agents. Try 🔥MetaChain🔥 Now!
 
 <div align="center">
   <!-- <img src="./assets/metachainnew-intro.pdf" alt="Logo" width="100%"> -->
@@ -44,10 +56,9 @@ Welcome to MetaChain! MetaChain is a **Fully-Automated** and highly **Self-Devel
 
 <div class="scrollable">
     <ul>
-      <li><strong>[2025, Feb 10]</strong>: &nbsp;🎉🎉We've released <b>MetaChain!</b>, including framework, evaluation codes and CLI mode! Check our <a href="./assets/paper/metachain_arxiv.pdf">paper</a> for more details.</li>
+      <li><strong>[2025, Feb 10]</strong>: &nbsp;🎉🎉We've released <b>MetaChain!</b>, including framework, evaluation codes and CLI mode! Check our <a href="https://arxiv.org/abs/2502.05957">paper</a> for more details.</li>
     </ul>
 </div>
-
 <span id='table-of-contents'/>
 
 ## 📑 Table of Contents
@@ -116,7 +127,7 @@ XAI_API_KEY=
 <span id='start-with-cli-mode'/>
 
 ### Start with CLI Mode
-Just run the following command to start the CLI mode. (use shell script `cd path/to/MetaChain && sh playground/cli/metachain_cli.sh`)
+Just run the following command to start the CLI mode. (use shell script `cd path/to/MetaChain && sh playground/cli/metachain_cli.sh`). The `COMPLETION_MODEL` is the name of the LLM you want to use. Note that we use [LiteLLM](https://github.com/BerriAI/litellm) as the LLM wrapper, so you should set the `COMPLETION_MODEL` according to the [LiteLLM](https://github.com/BerriAI/litellm) documentation. 
 
 ```bash
 current_dir=$(dirname "$(readlink -f "$0")")
@@ -131,9 +142,13 @@ export DEBUG=False # If you want to see detailed messages of agents' actions, se
 export MC_MODE=True # If you want to ignore the retry information of LLM connection, set to True
 export AI_USER=tjb-tech # Your Github username
 
+export FN_CALL=True
+export ADD_USER=False
+export NON_FN_CALL=False
+
 port=12345 # The port of the agent-interactive environment
 
-python playground/cli/metachain_cli.py --container_name quick_start --model ${COMPLETION_MODEL} --test_pull_name mirror_branch_0207 --debug --port ${port} --git_clone
+python playground/cli/metachain_cli.py --container_name quick_start --model ${COMPLETION_MODEL} --test_pull_name quick_start_pull --debug --port ${port} --git_clone
 ```
 
 After the CLI mode is started, you can see the start page of MetaChain: 
@@ -145,6 +160,20 @@ After the CLI mode is started, you can see the start page of MetaChain:
     <figcaption><em>Start Page of MetaChain.</em></figcaption>
   </figure>
 </div>
+
+### Tips
+
+#### Import browser cookies to browser environment
+
+You can import the browser cookies to the browser environment to let the agent better access some specific websites. For more details, please refer to the [cookies](./metachain/environment/cookie_json/README.md) folder.
+
+#### Add your own API keys for third-party Tool Platforms
+
+If you want to create tools from the third-party tool platforms, such as RapidAPI, you should subscribe tools from the platform and add your own API keys by running [process_tool_docs.py](./process_tool_docs.py). 
+
+```bash
+python process_tool_docs.py
+```
 
 More features coming soon! 🚀 **Web GUI interface** under development.
 
@@ -368,10 +397,10 @@ Rome wasn't built in a day. MetaChain stands on the shoulders of giants, and we 
       title={{MetaChain: A Fully-Automated and Zero-Code Framework for LLM Agents}},
       author={Jiabin Tang, Tianyu Fan, Chao Huang},
       year={2025},
-      eprint={202502.xxxxx},
+      eprint={202502.05957},
       archivePrefix={arXiv},
       primaryClass={cs.AI},
-      url={https://arxiv.org/abs/2502.xxxxx},
+      url={https://arxiv.org/abs/2502.05957},
 }
 ```
 

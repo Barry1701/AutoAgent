@@ -1,0 +1,38 @@
+.footer {
+  padding: 2rem 0;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  text-align: center;
+}
+
+.copyright {
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.9rem;
+}
+
+.social-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.social-icons img {
+  width: 20px;
+  height: 20px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.social-icons img:hover {
+  opacity: 1;
+}
+
+@media screen and (max-width: 768px) {
+  .copyright {
+    font-size: 0.8rem;
+  }
+} 
