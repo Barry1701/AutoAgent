@@ -7,6 +7,7 @@ export EVAL_MODE=True
 export BASE_IMAGES=tjbtech1/gaia-bookworm:v2
 export COMPLETION_MODEL=claude-3-5-haiku-20241022
 # export COMPLETION_MODEL=gpt-4o-2024-08-06
+# export API_BASE_URL = "http://localhost:8000/v1" # if vllm
 export DEBUG=False
 export MC_MODE=True
 export AI_USER=tjb-tech
