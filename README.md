@@ -108,7 +108,7 @@ docker pull tjbtech1/metachain:latest
 
 ### API Keys Setup
 
-Create a environment variable file, just like `.env.template`, and set the API keys for the LLMs you want to use. Not every LLM API Key is required, use what you need.
+Create an environment variable file, just like `.env.template`, and set the API keys for the LLMs you want to use. Not every LLM API Key is required, use what you need.
 
 ```bash
 # Required Github Tokens of your own
@@ -185,7 +185,7 @@ More features coming soon! 🚀 **Web GUI interface** under development.
 
 ### 1. `user mode` (SOTA 🏆 Open Deep Research)
 
-MetaChain have a out-of-the-box multi-agent system, which you could choose `user mode` in the start page to use it. This multi-agent system is a general AI assistant, having the same functionality with **OpenAI's Deep Research** and the comparable performance with it in [GAIA](https://gaia-benchmark-leaderboard.hf.space/) benchmark. 
+MetaChain have an out-of-the-box multi-agent system, which you could choose `user mode` in the start page to use it. This multi-agent system is a general AI assistant, having the same functionality with **OpenAI's Deep Research** and the comparable performance with it in [GAIA](https://gaia-benchmark-leaderboard.hf.space/) benchmark. 
 
 - 🚀 **High Performance**: Matches Deep Research using Claude 3.5 rather than OpenAI's o3 model.
 - 🔄 **Model Flexibility**: Compatible with any LLM (including Deepseek-R1, Grok, Gemini, etc.)
