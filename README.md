@@ -1,53 +1,53 @@
 <a name="readme-top"></a>
 
 <div align="center">
-  <img src="./assets/metachain_logo.svg" alt="Logo" width="200">
-  <h1 align="center">MetaChain: Fully-Automated & Zero-Code</br> LLM Agent Framework </h1>
+  <img src="./assets/AutoAgent_logo.svg" alt="Logo" width="200">
+  <h1 align="center">AutoAgent: Fully-Automated & Zero-Code</br> LLM Agent Framework </h1>
 </div>
 
 
 
 
 <div align="center">
-  <a href="https://metachain-ai.github.io"><img src="https://img.shields.io/badge/Project-Page-blue?style=for-the-badge&color=FFE165&logo=homepage&logoColor=white" alt="Credits"></a>
-  <a href="https://join.slack.com/t/metachain-workspace/shared_invite/zt-2zibtmutw-v7xOJObBf9jE2w3x7nctFQ"><img src="https://img.shields.io/badge/Slack-Join%20Us-red?logo=slack&logoColor=white&style=for-the-badge" alt="Join our Slack community"></a>
+  <a href="https://AutoAgent-ai.github.io"><img src="https://img.shields.io/badge/Project-Page-blue?style=for-the-badge&color=FFE165&logo=homepage&logoColor=white" alt="Credits"></a>
+  <a href="https://join.slack.com/t/AutoAgent-workspace/shared_invite/zt-2zibtmutw-v7xOJObBf9jE2w3x7nctFQ"><img src="https://img.shields.io/badge/Slack-Join%20Us-red?logo=slack&logoColor=white&style=for-the-badge" alt="Join our Slack community"></a>
   <a href="https://discord.gg/z68KRvwB"><img src="https://img.shields.io/badge/Discord-Join%20Us-purple?logo=discord&logoColor=white&style=for-the-badge" alt="Join our Discord community"></a>
   <br/>
-  <a href="https://metachain-ai.github.io/docs"><img src="https://img.shields.io/badge/Documentation-000?logo=googledocs&logoColor=FFE165&style=for-the-badge" alt="Check out the documentation"></a>
+  <a href="https://AutoAgent-ai.github.io/docs"><img src="https://img.shields.io/badge/Documentation-000?logo=googledocs&logoColor=FFE165&style=for-the-badge" alt="Check out the documentation"></a>
   <a href="https://arxiv.org/abs/2502.05957"><img src="https://img.shields.io/badge/Paper%20on%20Arxiv-000?logoColor=FFE165&logo=arxiv&style=for-the-badge" alt="Paper"></a>
   <a href="https://gaia-benchmark-leaderboard.hf.space/"><img src="https://img.shields.io/badge/GAIA%20Benchmark-000?logoColor=FFE165&logo=huggingface&style=for-the-badge" alt="Evaluation Benchmark Score"></a>
   <hr>
 </div>
 
-Welcome to MetaChain! MetaChain is a **Fully-Automated** and highly **Self-Developing** framework that enables users to create and deploy LLM agents through **Natural Language Alone**. 
+Welcome to AutoAgent! AutoAgent is a **Fully-Automated** and highly **Self-Developing** framework that enables users to create and deploy LLM agents through **Natural Language Alone**. 
 
 ## ✨Key Features
 
 * 🏆 Top Performer on the GAIA Benchmark
-</br>MetaChain has ranked the **#1** spot among open-sourced methods, delivering comparable performance to **OpenAI's Deep Research**.
+</br>AutoAgent has ranked the **#1** spot among open-sourced methods, delivering comparable performance to **OpenAI's Deep Research**.
 
 * 📚 Agentic-RAG with Native Self-Managing Vector Database
-</br>MetaChain equipped with a native self-managing vector database, outperforms industry-leading solutions like **LangChain**. 
+</br>AutoAgent equipped with a native self-managing vector database, outperforms industry-leading solutions like **LangChain**. 
 
 * ✨ Agent and Workflow Create with Ease
-</br>MetaChain leverages natural language to effortlessly build ready-to-use **tools**, **agents** and **workflows** - no coding required.
+</br>AutoAgent leverages natural language to effortlessly build ready-to-use **tools**, **agents** and **workflows** - no coding required.
 
 * 🌐 Universal LLM Support
-</br>MetaChain seamlessly integrates with **A Wide Range** of LLMs (e.g., OpenAI, Anthropic, Deepseek, vLLM, Grok, Huggingface ...)
+</br>AutoAgent seamlessly integrates with **A Wide Range** of LLMs (e.g., OpenAI, Anthropic, Deepseek, vLLM, Grok, Huggingface ...)
 
 * 🔀 Flexible Interaction 
 </br>Benefit from support for both **function-calling** and **ReAct** interaction modes.
 
 * 🤖 Dynamic, Extensible, Lightweight 
-</br>MetaChain is your **Personal AI Assistant**, designed to be dynamic, extensible, customized, and lightweight.
+</br>AutoAgent is your **Personal AI Assistant**, designed to be dynamic, extensible, customized, and lightweight.
 
-🚀 Unlock the Future of LLM Agents. Try 🔥MetaChain🔥 Now!
+🚀 Unlock the Future of LLM Agents. Try 🔥AutoAgent🔥 Now!
 
 <div align="center">
-  <!-- <img src="./assets/metachainnew-intro.pdf" alt="Logo" width="100%"> -->
+  <!-- <img src="./assets/AutoAgentnew-intro.pdf" alt="Logo" width="100%"> -->
   <figure>
-    <img src="./assets/metachain-intro-final.svg" alt="Logo" style="max-width: 100%; height: auto;">
-    <figcaption><em>Quick Overview of MetaChain.</em></figcaption>
+    <img src="./assets/AutoAgent-intro-final.svg" alt="Logo" style="max-width: 100%; height: auto;">
+    <figcaption><em>Quick Overview of AutoAgent.</em></figcaption>
   </figure>
 </div>
 
@@ -56,7 +56,7 @@ Welcome to MetaChain! MetaChain is a **Fully-Automated** and highly **Self-Devel
 
 <div class="scrollable">
     <ul>
-      <li><strong>[2025, Feb 10]</strong>: &nbsp;🎉🎉We've released <b>MetaChain!</b>, including framework, evaluation codes and CLI mode! Check our <a href="https://arxiv.org/abs/2502.05957">paper</a> for more details.</li>
+      <li><strong>[2025, Feb 10]</strong>: &nbsp;🎉🎉We've released <b>AutoAgent!</b>, including framework, evaluation codes and CLI mode! Check our <a href="https://arxiv.org/abs/2502.05957">paper</a> for more details.</li>
     </ul>
 </div>
 <span id='table-of-contents'/>
@@ -69,7 +69,7 @@ Welcome to MetaChain! MetaChain is a **Fully-Automated** and highly **Self-Devel
   * <a href='#installation'>Installation</a>
   * <a href='#api-keys-setup'>API Keys Setup</a>
   * <a href='#start-with-cli-mode'>Start with CLI Mode</a>
-* <a href='#how-to-use'>🔍 How to Use MetaChain</a>
+* <a href='#how-to-use'>🔍 How to Use AutoAgent</a>
   * <a href='#user-mode'>1. `user mode` (SOTA 🏆 Open Deep Research)</a>
   * <a href='#agent-editor'>2. `agent editor` (Agent Creation without Workflow)</a>
   * <a href='#workflow-editor'>3. `workflow editor` (Agent Creation with Workflow)</a>
@@ -88,11 +88,11 @@ Welcome to MetaChain! MetaChain is a **Fully-Automated** and highly **Self-Devel
 
 ### Installation
 
-#### MetaChain Installation
+#### AutoAgent Installation
 
 ```bash
-git clone https://github.com/HKUDS/MetaChain.git
-cd MetaChain
+git clone https://github.com/HKUDS/AutoAgent.git
+cd AutoAgent
 pip install -e .
 ```
 
@@ -101,7 +101,7 @@ pip install -e .
 We use Docker to containerize the agent-interactive environment. So please install [Docker](https://www.docker.com/) first. And pull the pre-built image with the following command.
 
 ```bash
-docker pull tjbtech1/metachain:latest
+docker pull tjbtech1/AutoAgent:latest
 ```
 
 <span id='api-keys-setup'/>
@@ -127,7 +127,7 @@ XAI_API_KEY=
 <span id='start-with-cli-mode'/>
 
 ### Start with CLI Mode
-Just run the following command to start the CLI mode. (use shell script `cd path/to/MetaChain && sh playground/cli/metachain_cli.sh`). The `COMPLETION_MODEL` is the name of the LLM you want to use. Note that we use [LiteLLM](https://github.com/BerriAI/litellm) as the LLM wrapper, so you should set the `COMPLETION_MODEL` according to the [LiteLLM](https://github.com/BerriAI/litellm) documentation. 
+Just run the following command to start the CLI mode. (use shell script `cd path/to/AutoAgent && sh playground/cli/AutoAgent_cli.sh`). The `COMPLETION_MODEL` is the name of the LLM you want to use. Note that we use [LiteLLM](https://github.com/BerriAI/litellm) as the LLM wrapper, so you should set the `COMPLETION_MODEL` according to the [LiteLLM](https://github.com/BerriAI/litellm) documentation. 
 
 ```bash
 current_dir=$(dirname "$(readlink -f "$0")")
@@ -136,7 +136,7 @@ cd $current_dir
 cd ../.. 
 export DOCKER_WORKPLACE_NAME=workplace
 export EVAL_MODE=True
-export BASE_IMAGES=tjbtech1/metachain:latest
+export BASE_IMAGES=tjbtech1/AutoAgent:latest
 export COMPLETION_MODEL=claude-3-5-sonnet-20241022
 export DEBUG=False # If you want to see detailed messages of agents' actions, set to True
 export MC_MODE=True # If you want to ignore the retry information of LLM connection, set to True
@@ -148,16 +148,16 @@ export NON_FN_CALL=False
 
 port=12345 # The port of the agent-interactive environment
 
-python playground/cli/metachain_cli.py --container_name quick_start --model ${COMPLETION_MODEL} --test_pull_name quick_start_pull --debug --port ${port} --git_clone
+python playground/cli/AutoAgent_cli.py --container_name quick_start --model ${COMPLETION_MODEL} --test_pull_name quick_start_pull --debug --port ${port} --git_clone
 ```
 
-After the CLI mode is started, you can see the start page of MetaChain: 
+After the CLI mode is started, you can see the start page of AutoAgent: 
 
 <div align="center">
-  <!-- <img src="./assets/metachainnew-intro.pdf" alt="Logo" width="100%"> -->
+  <!-- <img src="./assets/AutoAgentnew-intro.pdf" alt="Logo" width="100%"> -->
   <figure>
     <img src="./assets/cover.png" alt="Logo" style="max-width: 100%; height: auto;">
-    <figcaption><em>Start Page of MetaChain.</em></figcaption>
+    <figcaption><em>Start Page of AutoAgent.</em></figcaption>
   </figure>
 </div>
 
@@ -165,7 +165,7 @@ After the CLI mode is started, you can see the start page of MetaChain:
 
 #### Import browser cookies to browser environment
 
-You can import the browser cookies to the browser environment to let the agent better access some specific websites. For more details, please refer to the [cookies](./metachain/environment/cookie_json/README.md) folder.
+You can import the browser cookies to the browser environment to let the agent better access some specific websites. For more details, please refer to the [cookies](./AutoAgent/environment/cookie_json/README.md) folder.
 
 #### Add your own API keys for third-party Tool Platforms
 
@@ -179,13 +179,13 @@ More features coming soon! 🚀 **Web GUI interface** under development.
 
 <span id='how-to-use'/>
 
-## 🔍 How to Use MetaChain
+## 🔍 How to Use AutoAgent
 
 <span id='user-mode'/>
 
 ### 1. `user mode` (SOTA 🏆 Open Deep Research)
 
-MetaChain have an out-of-the-box multi-agent system, which you could choose `user mode` in the start page to use it. This multi-agent system is a general AI assistant, having the same functionality with **OpenAI's Deep Research** and the comparable performance with it in [GAIA](https://gaia-benchmark-leaderboard.hf.space/) benchmark. 
+AutoAgent have an out-of-the-box multi-agent system, which you could choose `user mode` in the start page to use it. This multi-agent system is a general AI assistant, having the same functionality with **OpenAI's Deep Research** and the comparable performance with it in [GAIA](https://gaia-benchmark-leaderboard.hf.space/) benchmark. 
 
 - 🚀 **High Performance**: Matches Deep Research using Claude 3.5 rather than OpenAI's o3 model.
 - 🔄 **Model Flexibility**: Compatible with any LLM (including Deepseek-R1, Grok, Gemini, etc.)
@@ -236,7 +236,7 @@ MetaChain have an out-of-the-box multi-agent system, which you could choose `use
 
 ### 2. `agent editor` (Agent Creation without Workflow)
 
-The most distinctive feature of MetaChain is its natural language customization capability. Unlike other agent frameworks, MetaChain allows you to create tools, agents, and workflows using natural language alone. Simply choose `agent editor` or `workflow editor` mode to start your journey of building agents through conversations.
+The most distinctive feature of AutoAgent is its natural language customization capability. Unlike other agent frameworks, AutoAgent allows you to create tools, agents, and workflows using natural language alone. Simply choose `agent editor` or `workflow editor` mode to start your journey of building agents through conversations.
 
 You can use `agent editor` as shown in the following figure.
 
@@ -323,7 +323,7 @@ You can also create the agent workflows using natural language description with 
 
 ## ☑️ Todo List
 
-MetaChain is continuously evolving! Here's what's coming:
+AutoAgent is continuously evolving! Here's what's coming:
 
 - 📊 **More Benchmarks**: Expanding evaluations to **SWE-bench**, **WebArena**, and more
 - 🖥️ **GUI Agent**: Supporting *Computer-Use* agents with GUI interaction
@@ -341,13 +341,13 @@ Have ideas or suggestions? Feel free to open an issue! Stay tuned for more excit
 For the GAIA benchmark, you can run the following command to run the inference.
 
 ```bash
-cd path/to/MetaChain && sh evaluation/gaia/scripts/run_infer.sh
+cd path/to/AutoAgent && sh evaluation/gaia/scripts/run_infer.sh
 ```
 
 For the evaluation, you can run the following command.
 
 ```bash
-cd path/to/MetaChain && python evaluation/gaia/get_score.py
+cd path/to/AutoAgent && python evaluation/gaia/get_score.py
 ```
 
 ### Agentic-RAG
@@ -359,7 +359,7 @@ Step1. Turn to [this page](https://huggingface.co/datasets/yixuantt/MultiHopRAG)
 Step2. Run the following command to run the inference.
 
 ```bash
-cd path/to/MetaChain && sh evaluation/multihoprag/scripts/run_rag.sh
+cd path/to/AutoAgent && sh evaluation/multihoprag/scripts/run_rag.sh
 ```
 
 Step3. The result will be saved in the `evaluation/multihoprag/result.json`.
@@ -368,24 +368,24 @@ Step3. The result will be saved in the `evaluation/multihoprag/result.json`.
 
 ## 📖 Documentation
 
-A more detailed documentation is coming soon 🚀, and we will update in the [Documentation](https://metachain-ai.github.io/docs) page.
+A more detailed documentation is coming soon 🚀, and we will update in the [Documentation](https://AutoAgent-ai.github.io/docs) page.
 
 <span id='community'/>
 
 ## 🤝 Join the Community
 
-We want to build a community for MetaChain, and we welcome everyone to join us. You can join our community by:
+We want to build a community for AutoAgent, and we welcome everyone to join us. You can join our community by:
 
-- [Join our Slack workspace](https://join.slack.com/t/metachain-workspace/shared_invite/zt-2zibtmutw-v7xOJObBf9jE2w3x7nctFQ) - Here we talk about research, architecture, and future development.
+- [Join our Slack workspace](https://join.slack.com/t/AutoAgent-workspace/shared_invite/zt-2zibtmutw-v7xOJObBf9jE2w3x7nctFQ) - Here we talk about research, architecture, and future development.
 - [Join our Discord server](https://discord.gg/z68KRvwB) - This is a community-run server for general discussion, questions, and feedback. 
-- [Read or post Github Issues](https://github.com/HKUDS/MetaChain/issues) - Check out the issues we're working on, or add your own ideas.
+- [Read or post Github Issues](https://github.com/HKUDS/AutoAgent/issues) - Check out the issues we're working on, or add your own ideas.
 
 
 <span id='acknowledgements'/>
 
 ## 🙏 Acknowledgements
 
-Rome wasn't built in a day. MetaChain stands on the shoulders of giants, and we are deeply grateful for the outstanding work that came before us. Our framework architecture draws inspiration from [OpenAI Swarm](https://github.com/openai/swarm), while our user mode's three-agent design benefits from [Magentic-one](https://github.com/microsoft/autogen/tree/main/python/packages/autogen-magentic-one)'s insights. We've also learned from [OpenHands](https://github.com/All-Hands-AI/OpenHands) for documentation structure and many other excellent projects for agent-environment interaction design, among others. We express our sincere gratitude and respect to all these pioneering works that have been instrumental in shaping MetaChain.
+Rome wasn't built in a day. AutoAgent stands on the shoulders of giants, and we are deeply grateful for the outstanding work that came before us. Our framework architecture draws inspiration from [OpenAI Swarm](https://github.com/openai/swarm), while our user mode's three-agent design benefits from [Magentic-one](https://github.com/microsoft/autogen/tree/main/python/packages/autogen-magentic-one)'s insights. We've also learned from [OpenHands](https://github.com/All-Hands-AI/OpenHands) for documentation structure and many other excellent projects for agent-environment interaction design, among others. We express our sincere gratitude and respect to all these pioneering works that have been instrumental in shaping AutoAgent.
 
 
 <span id='cite'/>
@@ -393,8 +393,8 @@ Rome wasn't built in a day. MetaChain stands on the shoulders of giants, and we 
 ## 🌟 Cite
 
 ```tex
-@misc{metachain,
-      title={{MetaChain: A Fully-Automated and Zero-Code Framework for LLM Agents}},
+@misc{AutoAgent,
+      title={{AutoAgent: A Fully-Automated and Zero-Code Framework for LLM Agents}},
       author={Jiabin Tang, Tianyu Fan, Chao Huang},
       year={2025},
       eprint={202502.05957},
