@@ -46,10 +46,11 @@ Welcome to AutoAgent! AutoAgent is a **Fully-Automated** and highly **Self-Devel
 <div align="center">
   <!-- <img src="./assets/AutoAgentnew-intro.pdf" alt="Logo" width="100%"> -->
   <figure>
-    <img src="./assets/AutoAgent-intro-final.svg" alt="Logo" style="max-width: 100%; height: auto;">
+    <img src="./assets/autoagent-intro.svg" alt="Logo" style="max-width: 100%; height: auto;">
     <figcaption><em>Quick Overview of AutoAgent.</em></figcaption>
   </figure>
 </div>
+
 
 
 ## 🔥 News

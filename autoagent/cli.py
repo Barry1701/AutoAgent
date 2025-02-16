@@ -105,7 +105,7 @@ def clear_screen():
     console = Console()
     console.print("[bold green]Coming soon...[/bold green]")
     print('\033[u\033[J\033[?25h', end='')  # Restore cursor and clear everything after it, show cursor
-def get_config(container_name, port):
+def get_config(container_name, port, test_pull_name="main", git_clone=False):
     container_name = container_name
     
     port_info = check_container_ports(container_name)
@@ -129,13 +129,14 @@ def get_config(container_name, port):
                 f.write(container_name)
     local_root = os.path.join(os.getcwd(), f"workspace_meta_showcase", f"showcase_{container_name}")
     os.makedirs(local_root, exist_ok=True)
-    print("port: ", port)
     docker_config = DockerConfig(
         workplace_name=DOCKER_WORKPLACE_NAME,
         container_name=container_name,
         communication_port=port,
         conda_path='/root/miniconda3',
         local_root=local_root,
+        test_pull_name=test_pull_name,
+        git_clone=git_clone
     )
     return docker_config
 def create_environment(docker_config: DockerConfig):
@@ -162,15 +163,14 @@ def update_guidance(context_variables):
     console.print(Panel(NOTES,title="Important Notes", expand=True))
 
 @cli.command(name='main')  # 修改这里，使用连字符
-@click.option('--container_name', default='quick_start', help='the function to get the agent')
-@click.option('--port', default=12345, help='the port to run the container')
+@click.option('--container_name', default='auto_agent', help='the function to get the agent')
+@click.option('--port', default=12347, help='the port to run the container')
 @click.option('--test_pull_name', default='autoagent_mirror', help='the name of the test pull')
 @click.option('--git_clone', default=True, help='whether to clone a mirror of the repository')
 def main(container_name: str, port: int, test_pull_name: str, git_clone: bool):
     """
     Run deep research with a given model, container name, port
     """ 
-    print(f"port: {port}")
     model = COMPLETION_MODEL
     print('\033[s\033[?25l', end='')  # Save cursor position and hide cursor
     with Progress(
@@ -181,7 +181,7 @@ def main(container_name: str, port: int, test_pull_name: str, git_clone: bool):
         task = progress.add_task("[cyan]Initializing...", total=None)
         
         progress.update(task, description="[cyan]Initializing config...[/cyan]\n")
-        docker_config = get_config(container_name, port)
+        docker_config = get_config(container_name, port, test_pull_name, git_clone)
         
         progress.update(task, description="[cyan]Setting up logger...[/cyan]\n")
         log_path = osp.join("casestudy_results", 'logs', f'agent_{container_name}_{model}.log')
@@ -297,7 +297,6 @@ def deep_research(container_name: str, port: int):
     """
     Run deep research with a given model, container name, port
     """ 
-    print(f"port: {port}")
     model = COMPLETION_MODEL
     print('\033[s\033[?25l', end='')  # Save cursor position and hide cursor
     with Progress(

@@ -7,7 +7,7 @@ def setup_metachain(workplace_name: str, env: DockerEnv):
     if response['status'] == 0:
         print("AutoAgent is already installed.")
         return
-    cmd = f"cd /{workplace_name}/MetaChain && pip install -e ."
+    cmd = f"cd /{workplace_name}/AutoAgent && pip install -e ."
     response = env.run_command(cmd, print_stream)
     if response['status'] == 0:
         print("AutoAgent is installed.")

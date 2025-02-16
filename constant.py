@@ -24,7 +24,7 @@ def str_to_bool(value):
 
 DOCKER_WORKPLACE_NAME = os.getenv('DOCKER_WORKPLACE_NAME', 'workplace')
 GITHUB_AI_TOKEN = os.getenv('GITHUB_AI_TOKEN', None)
-AI_USER = os.getenv('AI_USER', None)
+AI_USER = os.getenv('AI_USER', "tjb-tech")
 LOCAL_ROOT = os.getenv('LOCAL_ROOT', os.getcwd())
 
 DEBUG = str_to_bool(os.getenv('DEBUG', False))

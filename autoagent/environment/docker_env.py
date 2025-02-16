@@ -52,25 +52,25 @@ class DockerEnv:
             unzip_command = ["tar", "-xzvf", f"packages/{self.setup_package}.tar.gz", "-C", self.local_workplace]
             subprocess.run(unzip_command)
         if self.git_clone:
-            if not os.path.exists(os.path.join(self.local_workplace, 'MetaChain')):
-                git_command = ["cd", self.local_workplace, "&&", "git", "clone", "-b", self.test_pull_name, f"https://{AI_USER}:{GITHUB_AI_TOKEN}@github.com/HKUDS/MetaChain.git"]
+            if not os.path.exists(os.path.join(self.local_workplace, 'AutoAgent')):
+                git_command = ["cd", self.local_workplace, "&&", "git", "clone", "-b", self.test_pull_name, f"https://{AI_USER}:{GITHUB_AI_TOKEN}@github.com/HKUDS/AutoAgent.git"]
                 print(git_command)
                 git_command = " ".join(git_command)
                 
                 result = subprocess.run(git_command, shell=True)
                 if result.returncode != 0:
                     raise Exception(f"Failed to clone the repository. The error is: {result.stdout}")
-                copy_env_command = f"cp .env {self.local_workplace}/MetaChain"
+                copy_env_command = f"cp .env {self.local_workplace}/AutoAgent"
                 result = subprocess.run(copy_env_command, shell=True, capture_output=True, text=True)
                 if result.returncode != 0:
-                    raise Exception(f"Failed to copy .env file to the MetaChain directory. Error: {result.stderr}")
+                    raise Exception(f"Failed to copy .env file to the AutoAgent directory. Error: {result.stderr}")
                 # create a new branch
             new_branch_name = f"{self.test_pull_name}_{self.task_name}"
-            create_branch_command = f"cd {self.local_workplace}/MetaChain && git checkout -b {new_branch_name}"
+            create_branch_command = f"cd {self.local_workplace}/AutoAgent && git checkout -b {new_branch_name}"
             result = subprocess.run(create_branch_command, shell=True, capture_output=True, text=True)
             if result.returncode != 0:
                 print(Exception(f"Failed to create and switch to new branch. Error: {result.stderr}"))
-                switch_branch_command = f"cd {self.local_workplace}/MetaChain && git checkout {new_branch_name}"
+                switch_branch_command = f"cd {self.local_workplace}/AutoAgent && git checkout {new_branch_name}"
                 result = subprocess.run(switch_branch_command, shell=True, capture_output=True, text=True)
                 if result.returncode != 0:
                     raise Exception(f"Failed to switch to new branch. Error: {result.stderr}")
