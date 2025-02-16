@@ -3,7 +3,7 @@ from rich.console import Console
 from rich.markup import escape
 import json
 from typing import List
-from constant import DEBUG, DEFAULT_LOG, LOG_PATH
+from constant import DEBUG, DEFAULT_LOG, LOG_PATH, MC_MODE
 from pathlib import Path
 BAR_LENGTH = 60
 class MetaChainLogger:
@@ -31,12 +31,15 @@ class MetaChainLogger:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         message = "\n".join(map(str, args))
         color = kwargs.get("color", "white")
+        if MC_MODE: color = "grey58"
         title = kwargs.get("title", "INFO")
         log_str = f"[{timestamp}]\n{message}"
         if self.debug: 
             # print_in_box(log_str, color=color, title=title)
             self.console.print(self._wrap_title(title, f"bold {color}"))
-            self.console.print(escape(log_str), highlight=True, emoji=True)
+            print_str = escape(log_str)
+            if MC_MODE: print_str = f"[grey58]{print_str}[/grey58]"
+            self.console.print(print_str, highlight=True, emoji=True)
         log_str = self._wrap_title(title) + "\n" + log_str
         if self.log_path: self._write_log(log_str) 
     def lprint(self, *args: str, **kwargs: dict):
@@ -44,42 +47,61 @@ class MetaChainLogger:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         message = "\n".join(map(str, args))
         color = kwargs.get("color", "white")
+        if MC_MODE: color = "grey58"
         title = kwargs.get("title", "")
         log_str = f"[{timestamp}]\n{message}"
             # print_in_box(log_str, color=color, title=title)
         self.console.print(self._wrap_title(title, f"bold {color}"))
-        self.console.print(escape(log_str), highlight=True, emoji=True)
+        print_str = escape(log_str)
+        if MC_MODE: print_str = f"[grey58]{print_str}[/grey58]"
+        self.console.print(print_str, highlight=True, emoji=True)
         
     def _wrap_timestamp(self, timestamp: str, color: bool = True):
         color_bos = "[grey58]" if color else ""
         color_eos = "[/grey58]" if color else ""
         return f"{color_bos}[{timestamp}]{color_eos}"
     def _print_tool_execution(self, message, timestamp: str):
-        self.console.print(self._wrap_title("Tool Execution", "bold pink3"))
+        if MC_MODE: colors = ["grey58"] * 3
+        else: colors = ["pink3", "blue", "purple"]
+        self.console.print(self._wrap_title("Tool Execution", f"bold {colors[0]}"))
         self.console.print(self._wrap_timestamp(timestamp, color=True))
-        self.console.print("[bold blue]Tool Execution:[/bold blue]", end=" ")
-        self.console.print(f"[bold purple]{message['name']}[/bold purple]\n[bold blue]Result:[/bold blue]")
-        self.console.print(f"---\n{escape(message['content'])}\n---")
+        self.console.print(f"[bold {colors[1]}]Tool Execution:[/bold {colors[1]}]", end=" ")
+        self.console.print(f"[bold {colors[2]}]{message['name']}[/bold {colors[2]}]\n[bold {colors[1]}]Result:[/bold {colors[1]}]")
+        print_str = f"---\n{escape(message['content'])}\n---"
+        if MC_MODE: print_str = f"[grey58]{print_str}[/grey58]"
+        self.console.print(print_str, highlight=True, emoji=True)
     def _save_tool_execution(self, message, timestamp: str):
         self._write_log(self._wrap_title("Tool Execution"))
         self._write_log(f"{self._wrap_timestamp(timestamp, color=False)}\ntool execution: {message['name']}\nResult:\n---\n{message['content']}\n---")
     def _print_assistant_message(self, message, timestamp: str):
-        self.console.print(self._wrap_title("Assistant Message", "bold light_salmon3"))
-        self.console.print(f"{self._wrap_timestamp(timestamp, color=True)}\n[bold blue]{message['sender']}[/bold blue]:", end=" ")
-        if message["content"]: self.console.print(escape(message["content"]), highlight=True, emoji=True) 
-        else: self.console.print(None, highlight=True, emoji=True)
+        if MC_MODE: colors = ["grey58"] * 3
+        else: colors = ["light_salmon3", "blue", "purple"]
+        self.console.print(self._wrap_title("Assistant Message", f"bold {colors[0]}"))
+        self.console.print(f"{self._wrap_timestamp(timestamp, color=True)}\n[bold {colors[1]}]{message['sender']}[/bold {colors[1]}]:", end=" ")
+        if message["content"]: 
+            print_str = escape(message["content"])
+            if MC_MODE: print_str = f"[grey58]{print_str}[/grey58]"
+            self.console.print(print_str, highlight=True, emoji=True) 
+        else: 
+            print_str = None
+            if MC_MODE: print_str = "[grey58]None[/grey58]"
+            self.console.print(print_str, highlight=True, emoji=True)
     def _save_assistant_message(self, message, timestamp: str):
         self._write_log(self._wrap_title("Assistant Message"))
         content = message["content"] if message["content"] else None
         self._write_log(f"{self._wrap_timestamp(timestamp, color=False)}\n{message['sender']}: {content}")
     def _print_tool_call(self, tool_calls: List, timestamp: str):
-        if len(tool_calls) >= 1: self.console.print(self._wrap_title("Tool Calls", "bold light_pink1"))
+        if MC_MODE: colors = ["grey58"] * 3
+        else: colors = ["light_pink1", "blue", "purple"]
+        if len(tool_calls) >= 1: self.console.print(self._wrap_title("Tool Calls", f"bold {colors[0]}"))
 
         for tool_call in tool_calls:
             f = tool_call["function"]
             name, args = f["name"], f["arguments"]
             arg_str = self._warp_args(args)
-            self.console.print(f"{self._wrap_timestamp(timestamp, color=True)}\n[bold purple]{name}[/bold purple]({escape(arg_str)})")
+            print_arg_str = escape(arg_str)
+            if MC_MODE: print_arg_str = f"[grey58]{print_arg_str}[/grey58]"
+            self.console.print(f"{self._wrap_timestamp(timestamp, color=True)}\n[bold {colors[2]}]{name}[/bold {colors[2]}]({print_arg_str})")
     def _save_tool_call(self, tool_calls: List, timestamp: str):
         if len(tool_calls) >= 1: self._write_log(self._wrap_title("Tool Calls"))
 
