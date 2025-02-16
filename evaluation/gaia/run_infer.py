@@ -1,34 +1,33 @@
-from metachain.environment.docker_container import init_container
 import argparse
 from constant import DOCKER_WORKPLACE_NAME
 from datasets import load_dataset
 import huggingface_hub
-from metachain import MetaChain
-from metachain.logger import MetaChainLogger, LoggerManager
+from autoagent import MetaChain
+from autoagent.logger import MetaChainLogger, LoggerManager
 from evaluation.utils import make_metadata, prepare_dataset, update_progress, check_port_available, run_evaluation, clean_msg
 from evaluation.types import EvalMetadata, EvalOutput
-import metachain.agents as agenthub
+import autoagent.agents as agenthub
 import os.path as osp
 import pandas as pd
 import asyncio
 import re
 import os
 import shutil
-from metachain.registry import registry
+from autoagent.registry import registry
 from evaluation.gaia.scorer import question_scorer
 import json
-# from metachain.util import run_command_in_container
-from metachain.environment.docker_env import DockerEnv, DockerConfig, check_container_ports, check_container_exist, check_container_running
-from metachain.environment.browser_env import BrowserEnv
-from metachain.environment.markdown_browser import RequestsMarkdownBrowser
-from metachain.types import Response
-from metachain.util import function_to_json
-from metachain.main import run_in_client, run_in_client_non_async
-from metachain.agents.meta_agent.tool_editor import get_tool_editor_agent
-from metachain.environment.utils import setup_metachain
+# from autoagent.util import run_command_in_container
+from autoagent.environment.docker_env import DockerEnv, DockerConfig, check_container_ports, check_container_exist, check_container_running
+from autoagent.environment.browser_env import BrowserEnv
+from autoagent.environment.markdown_browser import RequestsMarkdownBrowser
+from autoagent.types import Response
+from autoagent.util import function_to_json
+from autoagent.main import run_in_client, run_in_client_non_async
+from autoagent.agents.meta_agent.tool_editor import get_tool_editor_agent
+from autoagent.environment.utils import setup_metachain
 import subprocess
 DATASET_CACHE_DIR = osp.join(osp.dirname(__file__), 'data')
-# Note: You should run this script in the root directory of the project metachain
+# Note: You should run this script in the root directory of the project autoagent
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--container_name', type=str, default='gaia_test')
