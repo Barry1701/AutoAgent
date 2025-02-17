@@ -57,7 +57,8 @@ Welcome to AutoAgent! AutoAgent is a **Fully-Automated** and highly **Self-Devel
 
 <div class="scrollable">
     <ul>
-      <li><strong>[2025, Feb 10]</strong>: &nbsp;🎉🎉We've released <b>AutoAgent!</b>, including framework, evaluation codes and CLI mode! Check our <a href="https://arxiv.org/abs/2502.05957">paper</a> for more details.</li>
+      <li><strong>[2025, Feb 17]</strong>: &nbsp;🎉🎉We've updated and released AutoAgent v0.2.0 (formerly known as MetaChain). Detailed changes include: 1) fix the bug of different LLM providers from issues; 2) add automatic installation of AutoAgent in the container environment according to issues; 3) add more easy-to-use commands for the CLI mode. 4) Rename the project to AutoAgent for better understanding.</li>
+      <li><strong>[2025, Feb 10]</strong>: &nbsp;🎉🎉We've released <b>MetaChain!</b>, including framework, evaluation codes and CLI mode! Check our <a href="https://arxiv.org/abs/2502.05957">paper</a> for more details.</li>
     </ul>
 </div>
 <span id='table-of-contents'/>
@@ -66,117 +67,20 @@ Welcome to AutoAgent! AutoAgent is a **Fully-Automated** and highly **Self-Devel
 
 * <a href='#features'>✨ Features</a>
 * <a href='#news'>🔥 News</a>
-* <a href='#quick-start'>⚡ Quick Start</a>
-  * <a href='#installation'>Installation</a>
-  * <a href='#api-keys-setup'>API Keys Setup</a>
-  * <a href='#start-with-cli-mode'>Start with CLI Mode</a>
 * <a href='#how-to-use'>🔍 How to Use AutoAgent</a>
   * <a href='#user-mode'>1. `user mode` (SOTA 🏆 Open Deep Research)</a>
   * <a href='#agent-editor'>2. `agent editor` (Agent Creation without Workflow)</a>
   * <a href='#workflow-editor'>3. `workflow editor` (Agent Creation with Workflow)</a>
+* <a href='#quick-start'>⚡ Quick Start</a>
+  * <a href='#installation'>Installation</a>
+  * <a href='#api-keys-setup'>API Keys Setup</a>
+  * <a href='#start-with-cli-mode'>Start with CLI Mode</a>
 * <a href='#todo'>☑️ Todo List</a>
 * <a href='#reproduce'>🔬 How To Reproduce the Results in the Paper</a>
 * <a href='#documentation'>📖 Documentation</a>
 * <a href='#community'>🤝 Join the Community</a>
 * <a href='#acknowledgements'>🙏 Acknowledgements</a>
 * <a href='#cite'>🌟 Cite</a>
-
-<span id='quick-start'/>
-
-## ⚡ Quick Start
-
-<span id='installation'/>
-
-### Installation
-
-#### AutoAgent Installation
-
-```bash
-git clone https://github.com/HKUDS/AutoAgent.git
-cd AutoAgent
-pip install -e .
-```
-
-#### Docker Installation
-
-We use Docker to containerize the agent-interactive environment. So please install [Docker](https://www.docker.com/) first. And pull the pre-built image with the following command.
-
-```bash
-docker pull tjbtech1/AutoAgent:latest
-```
-
-<span id='api-keys-setup'/>
-
-### API Keys Setup
-
-Create an environment variable file, just like `.env.template`, and set the API keys for the LLMs you want to use. Not every LLM API Key is required, use what you need.
-
-```bash
-# Required Github Tokens of your own
-GITHUB_AI_TOKEN=
-
-# Optional API Keys
-OPENAI_API_KEY=
-DEEPSEEK_API_KEY=
-ANTHROPIC_API_KEY=
-GEMINI_API_KEY=
-HUGGINGFACE_API_KEY=
-GROQ_API_KEY=
-XAI_API_KEY=
-```
-
-<span id='start-with-cli-mode'/>
-
-### Start with CLI Mode
-Just run the following command to start the CLI mode. (use shell script `cd path/to/AutoAgent && sh playground/cli/AutoAgent_cli.sh`). The `COMPLETION_MODEL` is the name of the LLM you want to use. Note that we use [LiteLLM](https://github.com/BerriAI/litellm) as the LLM wrapper, so you should set the `COMPLETION_MODEL` according to the [LiteLLM](https://github.com/BerriAI/litellm) documentation. 
-
-```bash
-current_dir=$(dirname "$(readlink -f "$0")")
-
-cd $current_dir
-cd ../.. 
-export DOCKER_WORKPLACE_NAME=workplace
-export EVAL_MODE=True
-export BASE_IMAGES=tjbtech1/AutoAgent:latest
-export COMPLETION_MODEL=claude-3-5-sonnet-20241022
-export DEBUG=False # If you want to see detailed messages of agents' actions, set to True
-export MC_MODE=True # If you want to ignore the retry information of LLM connection, set to True
-export AI_USER=tjb-tech # Your Github username
-
-export FN_CALL=True
-export ADD_USER=False
-export NON_FN_CALL=False
-
-port=12345 # The port of the agent-interactive environment
-
-python playground/cli/AutoAgent_cli.py --container_name quick_start --model ${COMPLETION_MODEL} --test_pull_name quick_start_pull --debug --port ${port} --git_clone
-```
-
-After the CLI mode is started, you can see the start page of AutoAgent: 
-
-<div align="center">
-  <!-- <img src="./assets/AutoAgentnew-intro.pdf" alt="Logo" width="100%"> -->
-  <figure>
-    <img src="./assets/cover.png" alt="Logo" style="max-width: 100%; height: auto;">
-    <figcaption><em>Start Page of AutoAgent.</em></figcaption>
-  </figure>
-</div>
-
-### Tips
-
-#### Import browser cookies to browser environment
-
-You can import the browser cookies to the browser environment to let the agent better access some specific websites. For more details, please refer to the [cookies](./AutoAgent/environment/cookie_json/README.md) folder.
-
-#### Add your own API keys for third-party Tool Platforms
-
-If you want to create tools from the third-party tool platforms, such as RapidAPI, you should subscribe tools from the platform and add your own API keys by running [process_tool_docs.py](./process_tool_docs.py). 
-
-```bash
-python process_tool_docs.py
-```
-
-More features coming soon! 🚀 **Web GUI interface** under development.
 
 <span id='how-to-use'/>
 
@@ -319,6 +223,230 @@ You can also create the agent workflows using natural language description with 
     </td>
 </tr>
 </table>
+
+<span id='quick-start'/>
+
+## ⚡ Quick Start
+
+<span id='installation'/>
+
+### Installation
+
+#### AutoAgent Installation
+
+```bash
+git clone https://github.com/HKUDS/AutoAgent.git
+cd AutoAgent
+pip install -e .
+```
+
+#### Docker Installation
+
+We use Docker to containerize the agent-interactive environment. So please install [Docker](https://www.docker.com/) first. You don't need to manually pull the pre-built image, because we have let Auto-Deep-Research **automatically pull the pre-built image based on your architecture of your machine**.
+
+<span id='api-keys-setup'/>
+
+### API Keys Setup
+
+Create an environment variable file, just like `.env.template`, and set the API keys for the LLMs you want to use. Not every LLM API Key is required, use what you need.
+
+```bash
+# Required Github Tokens of your own
+GITHUB_AI_TOKEN=
+
+# Optional API Keys
+OPENAI_API_KEY=
+DEEPSEEK_API_KEY=
+ANTHROPIC_API_KEY=
+GEMINI_API_KEY=
+HUGGINGFACE_API_KEY=
+GROQ_API_KEY=
+XAI_API_KEY=
+```
+
+<span id='start-with-cli-mode'/>
+
+### Start with CLI Mode
+
+> [🚨 **News**: ] We have updated a more easy-to-use command to start the CLI mode and fix the bug of different LLM providers from issues. You can follow the following steps to start the CLI mode with different LLM providers with much less configuration.
+
+#### Command Options:
+
+You can run `auto main` to start full part of AutoAgent, including `user mode`, `agent editor` and `workflow editor`. Btw, you can also run `auto deep-research` to start more lightweight `user mode`, just like the [Auto-Deep-Research](https://github.com/HKUDS/Auto-Deep-Research) project. Some configuration of this command is shown below. 
+
+- `--container_name`: Name of the Docker container (default: 'deepresearch')
+- `--port`: Port for the container (default: 12346)
+- `COMPLETION_MODEL`: Specify the LLM model to use, you should follow the name of [Litellm](https://github.com/BerriAI/litellm) to set the model name. (Default: `claude-3-5-sonnet-20241022`)
+- `DEBUG`: Enable debug mode for detailed logs (default: False)
+- `API_BASE_URL`: The base URL for the LLM provider (default: None)
+- `FN_CALL`: Enable function calling (default: None). Most of time, you could ignore this option because we have already set the default value based on the model name.
+- `git_clone`: Clone the AutoAgent repository to the local environment (only support with the `auto main` command, default: True)
+- `test_pull_name`: The name of the test pull. (only support with the `auto main` command, default: 'autoagent_mirror')
+
+#### More details about `git_clone` and `test_pull_name`] 
+
+In the `agent editor` and `workflow editor` mode, we should clone a mirror of the AutoAgent repository to the local agent-interactive environment and let our **AutoAgent** automatically update the AutoAgent itself, such as creating new tools, agents and workflows. So if you want to use the `agent editor` and `workflow editor` mode, you should set the `git_clone` to True and set the `test_pull_name` to 'autoagent_mirror' or other branches.
+
+#### `auto main` with different LLM Providers
+
+Then I will show you how to use the full part of AutoAgent with the `auto main` command and different LLM providers. If you want to use the `auto deep-research` command, you can refer to the [Auto-Deep-Research](https://github.com/HKUDS/Auto-Deep-Research) project for more details.
+
+##### Anthropic
+
+* set the `ANTHROPIC_API_KEY` in the `.env` file.
+
+```bash
+ANTHROPIC_API_KEY=your_anthropic_api_key
+```
+
+* run the following command to start Auto-Deep-Research.
+
+```bash
+auto main # default model is claude-3-5-sonnet-20241022
+```
+
+##### OpenAI
+
+* set the `OPENAI_API_KEY` in the `.env` file.
+
+```bash
+OPENAI_API_KEY=your_openai_api_key
+```
+
+* run the following command to start Auto-Deep-Research.
+
+```bash
+COMPLETION_MODEL=gpt-4o auto main
+```
+
+##### Mistral
+
+* set the `MISTRAL_API_KEY` in the `.env` file.
+
+```bash
+MISTRAL_API_KEY=your_mistral_api_key
+```
+
+* run the following command to start Auto-Deep-Research.
+
+```bash
+COMPLETION_MODEL=mistral/mistral-large-2407 auto main
+```
+
+##### Gemini - Google AI Studio
+
+* set the `GEMINI_API_KEY` in the `.env` file.
+
+```bash
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+* run the following command to start Auto-Deep-Research.
+
+```bash
+COMPLETION_MODEL=gemini/gemini-2.0-flash auto main
+```
+
+##### Huggingface
+
+* set the `HUGGINGFACE_API_KEY` in the `.env` file.
+
+```bash
+HUGGINGFACE_API_KEY=your_huggingface_api_key
+```
+
+* run the following command to start Auto-Deep-Research.
+
+```bash
+COMPLETION_MODEL=huggingface/meta-llama/Llama-3.3-70B-Instruct auto main
+```
+
+##### Groq
+
+* set the `GROQ_API_KEY` in the `.env` file.
+
+```bash
+GROQ_API_KEY=your_groq_api_key
+```
+
+* run the following command to start Auto-Deep-Research.
+
+```bash
+COMPLETION_MODEL=groq/deepseek-r1-distill-llama-70b auto main
+```
+
+##### OpenAI-Compatible Endpoints (e.g., Grok)
+
+* set the `OPENAI_API_KEY` in the `.env` file.
+
+```bash
+OPENAI_API_KEY=your_api_key_for_openai_compatible_endpoints
+```
+
+* run the following command to start Auto-Deep-Research.
+
+```bash
+COMPLETION_MODEL=openai/grok-2-latest API_BASE_URL=https://api.x.ai/v1 auto main
+```
+
+##### OpenRouter (e.g., DeepSeek-R1)
+
+We recommend using OpenRouter as LLM provider of DeepSeek-R1 temporarily. Because official API of DeepSeek-R1 can not be used efficiently.
+
+* set the `OPENROUTER_API_KEY` in the `.env` file.
+
+```bash
+OPENROUTER_API_KEY=your_openrouter_api_key
+```
+
+* run the following command to start Auto-Deep-Research.
+
+```bash
+COMPLETION_MODEL=openrouter/deepseek/deepseek-r1 auto main
+```
+
+##### DeepSeek
+
+* set the `DEEPSEEK_API_KEY` in the `.env` file.
+
+```bash
+DEEPSEEK_API_KEY=your_deepseek_api_key
+```
+
+* run the following command to start Auto-Deep-Research.
+
+```bash
+COMPLETION_MODEL=deepseek/deepseek-chat auto main
+```
+
+
+After the CLI mode is started, you can see the start page of AutoAgent: 
+
+<div align="center">
+  <!-- <img src="./assets/AutoAgentnew-intro.pdf" alt="Logo" width="100%"> -->
+  <figure>
+    <img src="./assets/cover.png" alt="Logo" style="max-width: 100%; height: auto;">
+    <figcaption><em>Start Page of AutoAgent.</em></figcaption>
+  </figure>
+</div>
+
+### Tips
+
+#### Import browser cookies to browser environment
+
+You can import the browser cookies to the browser environment to let the agent better access some specific websites. For more details, please refer to the [cookies](./AutoAgent/environment/cookie_json/README.md) folder.
+
+#### Add your own API keys for third-party Tool Platforms
+
+If you want to create tools from the third-party tool platforms, such as RapidAPI, you should subscribe tools from the platform and add your own API keys by running [process_tool_docs.py](./process_tool_docs.py). 
+
+```bash
+python process_tool_docs.py
+```
+
+More features coming soon! 🚀 **Web GUI interface** under development.
+
+
 
 <span id='todo'/>
 
