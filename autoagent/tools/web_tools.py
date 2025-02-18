@@ -342,14 +342,16 @@ def visit_url(context_variables, url: str):
 @register_tool("web_search")
 def web_search(context_variables, query: str):
     """
-    Performs a web search on 'https://www.google.com.sg/?hl=en&gl=US' with the given query.
+    Performs a web search on 'https://www.bing.com/search' with the given query.
     Args:
         query: The query to search for.
     """
     env: BrowserEnv = context_variables.get("web_env", None)
     assert env is not None, "web_env is not set"
     try:
-        action_str = f"_visit_page('https://www.google.com.sg/search?q={quote_plus(query)}&hl=en&gl=US')"
+        # action_str = f"_visit_page('https://www.google.com.sg/search?q={quote_plus(query)}&hl=en')"
+        action_str = f"_visit_page('https://www.bing.com/search?q={quote_plus(query)}&FORM=QBLH&hl=en')"
+
         obs = env.step(action_str)
         web_obs = to_web_obs(obs)
     except Exception as e:
@@ -443,15 +445,18 @@ if __name__ == "__main__":
     # print(res.value)
     # res = visit_url(env, 'https://arxiv.org/pdf/2310.13023')
     # print(res.value)
+
+
     context_variables = {"web_env": env}
-    res = visit_url(context_variables, 'https://en.wikipedia.org/wiki/History_of_the_United_States')
+    res = visit_url(context_variables, 'https://www.youtube.com/watch?v=pPStdjuYzSI')
     # res = visit_url(env, 'https://www.reddit.com/r/ChatGPT/comments/1h5ey4m/chatgpt_helped_me_not_blow_up_on_my_boss/')
     print("******visit_url", res.value)  
 
     res = get_page_markdown(context_variables)
     print("******get_page_markdown", res.value)
-    res = page_down(context_variables)
-    print("******page_down", res.value)
-    res = history_back(context_variables)
-    print("******history_back", res.value)
+    # res = page_down(context_variables)
+    # print("******page_down", res.value)
+    # res = history_back(context_variables)
+    # print("******history_back", res.value)
     
+    # print(function_to_json(page_down))

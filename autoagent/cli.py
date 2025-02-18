@@ -239,6 +239,7 @@ def user_mode(model: str, context_variables: dict, debug: bool = True):
         style=style
     )
     client = MetaChain(log_path=logger)
+    upload_infos = []
     while True: 
         # query = ask_text("Tell me what you want to do:")
         query = session.prompt(
@@ -246,7 +247,7 @@ def user_mode(model: str, context_variables: dict, debug: bool = True):
             bottom_toolbar=HTML('<b>Prompt:</b> Enter <b>@</b> to mention Agents')
         )
         if query.strip().lower() == 'exit':
-            # logger.info('User mode completed.  See you next time! :waving_hand:', color='green', title='EXIT')
+            # logger.info('User mode completed. See you next time! :waving_hand:', color='green', title='EXIT')
             
             logo_text = "User mode completed. See you next time! :waving_hand:"
             console.print(Panel(logo_text, style="bold salmon1", expand=True))
@@ -265,6 +266,8 @@ def user_mode(model: str, context_variables: dict, debug: bool = True):
         if hasattr(agent, "name"): 
             agent_name = agent.name
             console.print(f"[bold green][bold magenta]@{agent_name}[/bold magenta] will help you, be patient...[/bold green]")
+            if len(upload_infos) > 0:
+                query = "{}\n\nUser uploaded files:\n{}".format(query, "\n".join(upload_infos))
             messages.append({"role": "user", "content": query})
             response = client.run(agent, messages, context_variables, debug=debug)
             messages.extend(response.messages)
@@ -284,9 +287,12 @@ def user_mode(model: str, context_variables: dict, debug: bool = True):
         elif agent == "select": 
             code_env: DockerEnv = context_variables["code_env"]
             local_workplace = code_env.local_workplace
+            docker_workplace = code_env.docker_workplace
             files_dir = os.path.join(local_workplace, "files")
+            docker_files_dir = os.path.join(docker_workplace, "files")
             os.makedirs(files_dir, exist_ok=True)
-            select_and_copy_files(files_dir, console)
+            upload_infos.extend(select_and_copy_files(files_dir, console, docker_files_dir))
+            agent = agents["System_Triage_Agent"]
         else: 
             console.print(f"[bold red]Unknown agent: {agent}[/bold red]")
 

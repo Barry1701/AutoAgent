@@ -465,7 +465,7 @@ def _local_to_docker(local_path: str):
                 'browsergym/openended',
                 task_kwargs={'start_url': 'about:blank', 'goal': 'PLACEHOLDER_GOAL'},
                 wait_for_user_message=False,
-                headless=True,
+                headless=False,
                 disable_env_checker=True,
                 tags_to_mark='all',
                 action_mapping = action_mapping

@@ -349,12 +349,12 @@ def function_to_json(func) -> dict:
         if param.default == inspect._empty
     ]
 
-    if not parameters:
-        parameters["dummy"] = {
-            "type": "string",
-            "description": "Dummy parameter (not used). Added to satisfy non-empty schema requirements."
-        }
-        required = []
+    # if not parameters:
+    #     parameters["dummy"] = {
+    #         "type": "string",
+    #         "description": "Dummy parameter (not used). Added to satisfy non-empty schema requirements."
+    #     }
+    #     required = []
 
     return {
         "type": "function",

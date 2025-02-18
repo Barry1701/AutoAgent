@@ -24,6 +24,7 @@ def flatten_md_axtree_to_str(
     node_id_to_idx = {}
     for idx, node in enumerate(AX_tree["nodes"]):
         node_id_to_idx[node["nodeId"]] = idx
+    # print("******************************* AX_tree:", AX_tree)
 
     def dfs(node_idx: int, depth: int, parent_node_filtered: bool, parent_node_name: str) -> str:
         tree_str = ""
@@ -145,5 +146,63 @@ def flatten_md_axtree_to_str(
 
         return tree_str
 
-    tree_str = dfs(0, 0, False, "")
+    tree_str = dfs(0, 1, False, "")
     return tree_str
+
+# def flatten_md_axtree_to_str(
+#     AX_tree,
+#     extra_properties: dict = None,
+#     with_visible: bool = False,
+#     with_clickable: bool = False,
+#     with_center_coords: bool = False,
+#     with_bounding_box_coords: bool = False,
+#     with_som: bool = False,
+#     skip_generic: bool = True,
+#     filter_visible_only: bool = False,
+#     filter_with_bid_only: bool = False,
+#     filter_som_only: bool = False,
+#     coord_decimals: int = 0,
+#     ignored_roles=IGNORED_AXTREE_ROLES,
+#     ignored_properties=IGNORED_AXTREE_PROPERTIES,
+#     remove_redundant_static_text: bool = True,
+#     hide_bid_if_invisible: bool = False,
+#     hide_all_children: bool = False,
+#     hide_all_bids: bool = False,
+# ) -> str:
+#     """Formats the accessibility tree into a markdown string"""
+#     if not AX_tree or "nodes" not in AX_tree or not AX_tree["nodes"]:
+#         return "No content available"
+        
+#     node_id_to_idx = {}
+#     for idx, node in enumerate(AX_tree["nodes"]):
+#         node_id_to_idx[node["nodeId"]] = idx
+
+#     def dfs(node_idx: int, depth: int, parent_node_filtered: bool, parent_node_name: str) -> str:
+#         tree_str = ""
+#         node = AX_tree["nodes"][node_idx]
+        
+#         # 处理节点内容
+#         if "name" in node and "value" in node["name"]:
+#             content = node["name"]["value"].strip()
+#             if content:
+#                 # 移除多余的空白字符
+#                 content = ' '.join(content.split())
+#                 # 添加到输出
+#                 tree_str += content + "\n"
+        
+#         # 递归处理子节点
+#         for child_node_id in node.get("childIds", []):
+#             if child_node_id in node_id_to_idx and child_node_id != node["nodeId"]:
+#                 child_str = dfs(
+#                     node_id_to_idx[child_node_id],
+#                     depth + 1,
+#                     parent_node_filtered=False,
+#                     parent_node_name=node.get("name", {}).get("value", "")
+#                 )
+#                 if child_str:
+#                     tree_str += child_str
+
+#         return tree_str
+
+#     tree_str = dfs(0, 0, False, "")
+#     return tree_str.strip()

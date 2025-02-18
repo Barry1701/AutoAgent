@@ -1051,8 +1051,10 @@ def _get_page_markdown():
     
         # 将markdown内容转换为简单的HTML结构
         # 将markdown内容按固定长度分块
-        chunk_size = 10000  # 每块大约1000字符
+        chunk_size = 5000  # 每块大约1000字符
         content = res.text_content
+
+
         chunks = [content[i:i+chunk_size] for i in range(0, len(content), chunk_size)]
         
         formatted_content = ''
