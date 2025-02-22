@@ -9,11 +9,11 @@
 
 
 <div align="center">
-  <a href="https://AutoAgent-ai.github.io"><img src="https://img.shields.io/badge/Project-Page-blue?style=for-the-badge&color=FFE165&logo=homepage&logoColor=white" alt="Credits"></a>
-  <a href="https://join.slack.com/t/AutoAgent-workspace/shared_invite/zt-2zibtmutw-v7xOJObBf9jE2w3x7nctFQ"><img src="https://img.shields.io/badge/Slack-Join%20Us-red?logo=slack&logoColor=white&style=for-the-badge" alt="Join our Slack community"></a>
-  <a href="https://discord.gg/z68KRvwB"><img src="https://img.shields.io/badge/Discord-Join%20Us-purple?logo=discord&logoColor=white&style=for-the-badge" alt="Join our Discord community"></a>
+  <a href="https://metachain-ai.github.io"><img src="https://img.shields.io/badge/Project-Page-blue?style=for-the-badge&color=FFE165&logo=homepage&logoColor=white" alt="Credits"></a>
+  <a href="https://join.slack.com/t/metachain-workspace/shared_invite/zt-2zibtmutw-v7xOJObBf9jE2w3x7nctFQ"><img src="https://img.shields.io/badge/Slack-Join%20Us-red?logo=slack&logoColor=white&style=for-the-badge" alt="Join our Slack community"></a>
+  <a href="https://discord.gg/jQJdXyDB"><img src="https://img.shields.io/badge/Discord-Join%20Us-purple?logo=discord&logoColor=white&style=for-the-badge" alt="Join our Discord community"></a>
   <br/>
-  <a href="https://AutoAgent-ai.github.io/docs"><img src="https://img.shields.io/badge/Documentation-000?logo=googledocs&logoColor=FFE165&style=for-the-badge" alt="Check out the documentation"></a>
+  <a href="https://metachain-ai.github.io/docs"><img src="https://img.shields.io/badge/Documentation-000?logo=googledocs&logoColor=FFE165&style=for-the-badge" alt="Check out the documentation"></a>
   <a href="https://arxiv.org/abs/2502.05957"><img src="https://img.shields.io/badge/Paper%20on%20Arxiv-000?logoColor=FFE165&logo=arxiv&style=for-the-badge" alt="Paper"></a>
   <a href="https://gaia-benchmark-leaderboard.hf.space/"><img src="https://img.shields.io/badge/GAIA%20Benchmark-000?logoColor=FFE165&logo=huggingface&style=for-the-badge" alt="Evaluation Benchmark Score"></a>
   <hr>
@@ -98,44 +98,14 @@ AutoAgent have an out-of-the-box multi-agent system, which you could choose `use
 - 🎯 **User-Friendly**: Easy-to-deploy CLI interface for seamless interaction
 - 📁 **File Support**: Handles file uploads for enhanced data interaction
 
-<table>
-<tr align="center">
-    <td width="33%">
-        <img src="./assets/user_mode/input.png" alt="Input" width="100%"/>
-        <br>
-        <em>Input your request.</em>
-    </td>
-    <td width="33%">
-        <img src="./assets/user_mode/output.png" alt="Output" width="100%"/>
-        <br>
-        <em>Agent will give you the response.</em>
-    </td>
-    <td width="33%">
-        <img src="./assets/user_mode/select_agent.png" alt="Select Agent" width="100%"/>
-        <br>
-        <em>Use @ to mention the agent you want to use. (Optional)</em>
-    </td>
-</tr>
-</table>
-<table>
-<tr align="center">
-    <td width="33%">
-        <img src="./assets/user_mode/4-upload.png" alt="Input" width="100%"/>
-        <br>
-        <em>@Upload_files will help you upload the files.</em>
-    </td>
-    <td width="33%">
-        <img src="./assets/user_mode/5-select.png" alt="Output" width="100%"/>
-        <br>
-        <em>Select the files you want to use.</em>
-    </td>
-    <td width="33%">
-        <img src="./assets/user_mode/6-success.png" alt="Select Agent" width="100%"/>
-        <br>
-        <em>Successfully uploaded the files.</em>
-    </td>
-</tr>
-</table>
+
+<div align="center">
+  <video width="80%" controls>
+    <source src="./assets/video_v1.mp4" type="video/mp4">
+  </video>
+  <p><em>🎥 Deep Research (aka User Mode)</em></p>
+</div>
+
 
 <span id='agent-editor'/>
 
