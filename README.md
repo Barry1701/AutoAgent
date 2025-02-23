@@ -98,13 +98,13 @@ AutoAgent have an out-of-the-box multi-agent system, which you could choose `use
 - 🎯 **User-Friendly**: Easy-to-deploy CLI interface for seamless interaction
 - 📁 **File Support**: Handles file uploads for enhanced data interaction
 
-
 <div align="center">
   <video width="80%" controls>
-    <source src="./assets/video_v1.mp4" type="video/mp4">
+    <source src="./assets/video_v1_compressed.mp4" type="video/mp4">
   </video>
   <p><em>🎥 Deep Research (aka User Mode)</em></p>
 </div>
+
 
 
 <span id='agent-editor'/>
