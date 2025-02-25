@@ -4,9 +4,9 @@ import './KeyFeatures.css';
 export function KeyFeatures() {
   return (
     <div className="key-features">
-      <div className="intro-image">
-        <img src="/img/metachain-intro-final.svg" alt="MetaChain Introduction" />
-      </div>
+      {/* <div className="intro-image">
+        <img src="/img/autoagent-intro.svg" alt="AutoAgent Introduction" />
+      </div> */}
       <h2 className="features-title">Key Features</h2>
       <ul className="features-list">
         <li>
@@ -14,7 +14,7 @@ export function KeyFeatures() {
           <div className="feature-content">
             <strong>Top Performer on the GAIA Benchmark</strong>
             <p>
-              MetaChain has ranked the <span className="highlight">#1</span> spot among open-sourced methods, delivering comparable performance to <span className="highlight">OpenAI's Deep Research</span>.
+              AutoAgent has ranked the <span className="highlight">#1</span> spot among open-sourced methods, delivering comparable performance to <span className="highlight">OpenAI's Deep Research</span>.
             </p>
           </div>
         </li>
@@ -24,7 +24,7 @@ export function KeyFeatures() {
           <div className="feature-content">
             <strong>Agentic-RAG with Native Self-Managing Vector Database</strong>
             <p>
-              MetaChain equipped with a native self-managing vector database, outperforms industry-leading solutions like <span className="highlight">LangChain</span>.
+              AutoAgent equipped with a native self-managing vector database, outperforms industry-leading solutions like <span className="highlight">LangChain</span>.
             </p>
           </div>
         </li>
@@ -34,7 +34,7 @@ export function KeyFeatures() {
           <div className="feature-content">
             <strong>Agent and Workflow Create with Ease</strong>
             <p>
-              MetaChain leverages natural language to effortlessly build ready-to-use <span className="highlight">tools</span>, <span className="highlight">agents</span> and <span className="highlight">workflows</span> - no coding required.
+              AutoAgent leverages natural language to effortlessly build ready-to-use <span className="highlight">tools</span>, <span className="highlight">agents</span> and <span className="highlight">workflows</span> - no coding required.
             </p>
           </div>
         </li>
@@ -44,7 +44,7 @@ export function KeyFeatures() {
           <div className="feature-content">
             <strong>Universal LLM Support</strong>
             <p>
-              MetaChain seamlessly integrates with <span className="highlight">A Wide Range</span> of LLMs (OpenAI, Anthropic, Deepseek, vLLM, Grok, Huggingface).
+              AutoAgent seamlessly integrates with <span className="highlight">A Wide Range</span> of LLMs (OpenAI, Anthropic, Deepseek, vLLM, Grok, Huggingface).
             </p>
           </div>
         </li>
@@ -64,7 +64,7 @@ export function KeyFeatures() {
           <div className="feature-content">
             <strong>Dynamic, Extensible, Lightweight</strong>
             <p>
-              MetaChain is your <span className="highlight">Personal AI Assistant</span>, designed to be dynamic, extensible, customized, and lightweight.
+              AutoAgent is your <span className="highlight">Personal AI Assistant</span>, designed to be dynamic, extensible, customized, and lightweight.
             </p>
           </div>
         </li>

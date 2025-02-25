@@ -18,7 +18,7 @@ export function Demo() {
         onMouseOut={() => (videoRef.current.controls = false)}
         ref={videoRef}
       >
-        <source src="img/teaser.mp4" type="video/mp4"></source>
+        <source src="img/video_v1_compressed.mp4" type="video/mp4"></source>
       </video>
     </div>
   );

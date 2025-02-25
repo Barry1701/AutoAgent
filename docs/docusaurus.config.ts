@@ -3,17 +3,17 @@ import type { Config } from "@docusaurus/types";
 import { themes as prismThemes } from "prism-react-renderer";
 
 const config: Config = {
-  title: "MetaChain",
+  title: "AutoAgent",
   tagline: "Fully-Automated & Zero-Code LLM Agent Framework",
   favicon: "img/metachain_logo.svg",
 
   // Set the production url of your site here
-  url: "https://metachain-ai.github.io",
+  url: "https://autoagent-ai.github.io",
   baseUrl: "/",
 
   // GitHub pages deployment config.
-  organizationName: "metachain-ai",
-  projectName: "metachain-ai.github.io",
+  organizationName: "autoagent-ai",
+  projectName: "autoagent-ai.github.io",
   trailingSlash: false,
   deploymentBranch: "main",
 
@@ -49,9 +49,9 @@ const config: Config = {
   themeConfig: {
     image: "img/docusaurus.png",
     navbar: {
-      title: "MetaChain",
+      title: "AutoAgent",
       logo: {
-        alt: "MetaChain",
+        alt: "AutoAgent",
         src: "img/metachain_logo.svg",
       },
       items: [
@@ -62,7 +62,7 @@ const config: Config = {
           label: "Docs",
         },
         {
-          href: "https://github.com/HKUDS/MetaChain",
+          href: "https://github.com/HKUDS/AutoAgent",
           label: "GitHub",
           position: "right",
         },

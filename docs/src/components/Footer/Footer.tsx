@@ -6,7 +6,7 @@ export function Footer() {
     <footer className="footer">
       <div className="footer-content">
         <div className="copyright">
-          Copyright © 2025 MetaChain Team
+          Copyright © 2025 AutoAgent Team
         </div>
       </div>
     </footer>

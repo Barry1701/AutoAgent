@@ -11,17 +11,17 @@ function CustomFooter() {
           <a href="https://join.slack.com/t/metachain-workspace/shared_invite/zt-2zibtmutw-v7xOJObBf9jE2w3x7nctFQ" target="_blank" rel="noopener noreferrer">
             <FaSlack />
           </a>
-          <a href="https://discord.gg/z68KRvwB" target="_blank" rel="noopener noreferrer">
+          <a href="https://discord.gg/jQJdXyDB" target="_blank" rel="noopener noreferrer">
             <FaDiscord />
           </a>
-          <a href="https://github.com/HKUDS/MetaChain" target="_blank" rel="noopener noreferrer">
+          <a href="https://github.com/HKUDS/AutoAgent" target="_blank" rel="noopener noreferrer">
             <FaGithub />
           </a>
         </div>
         <div className="footer-bottom">
           <p>
             <Translate id="footer.copyright" values={{ year: new Date().getFullYear() }}>
-              {'Copyright © {year} HKU MetaChain Team'}
+              {'Copyright © {year} HKU AutoAgent Team'}
             </Translate>
           </p>
         </div>

@@ -4,6 +4,7 @@ import Heading from "@theme/Heading";
 import { KeyFeatures } from "../KeyFeatures/KeyFeatures";
 import Translate from '@docusaurus/Translate';
 import "../../css/homepageHeader.css";
+import { Demo } from "../Demo/Demo";
 
 export function HomepageHeader() {
   const { siteConfig } = useDocusaurusContext();
@@ -18,9 +19,9 @@ export function HomepageHeader() {
 
         <div className="social-links">
           <div className="link-row">
-            <a href="https://metachain-ai.github.io" className="link-button project">
-              <span className="icon">📋</span>
-              <span className="text">PROJECT</span>
+            <a href="https://github.com/HKUDS/AutoAgent" className="link-button project">
+              <span className="icon">💻</span>
+              <span className="text">CODE</span>
               <span className="highlight">PAGE</span>
             </a>
             <a href="https://join.slack.com/t/metachain-workspace/shared_invite/zt-2zibtmutw-v7xOJObBf9jE2w3x7nctFQ" className="link-button slack">
@@ -28,14 +29,14 @@ export function HomepageHeader() {
               <span className="text">SLACK</span>
               <span className="highlight">JOIN US</span>
             </a>
-            <a href="https://discord.gg/z68KRvwB" className="link-button discord">
+            <a href="https://discord.gg/jQJdXyDB" className="link-button discord">
               <span className="icon">🎮</span>
               <span className="text">DISCORD</span>
               <span className="highlight">JOIN US</span>
             </a>
           </div>
           <div className="link-row">
-            <a href="https://metachain-ai.github.io/docs" className="link-button docs">
+            <a href="https://autoagent-ai.github.io/docs" className="link-button docs">
               <span className="icon">📚</span>
               <span className="text">DOCUMENTATION</span>
             </a>
@@ -49,8 +50,8 @@ export function HomepageHeader() {
             </a>
           </div>
         </div>
-
-        <KeyFeatures />
+        <Demo />
+        <KeyFeatures/>
       </div>
     </div>
   );
