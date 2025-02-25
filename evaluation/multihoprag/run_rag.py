@@ -1,9 +1,9 @@
 from constant import DOCKER_WORKPLACE_NAME
-from metachain.environment.docker_container import init_container
-from metachain.io_utils import read_yaml_file, get_md5_hash_bytext
-from metachain.agents import get_rag_agent
-from metachain.core import MetaChain
-from metachain.environment.docker_env import DockerEnv, DockerConfig, with_env
+from autoagent.environment.docker_container import init_container
+from autoagent.io_utils import read_yaml_file, get_md5_hash_bytext
+from autoagent.agents import get_rag_agent
+from autoagent.core import AutoAgent
+from autoagent.environment.docker_env import DockerEnv, DockerConfig, with_env
 import argparse
 import asyncio
 import csv
@@ -26,7 +26,6 @@ def get_env(container_name: str = 'gaia_test', model: str = 'gpt-4o-mini-2024-07
     docker_config = DockerConfig(container_name=container_name, workplace_name=workplace_name, communication_port=12345, conda_path='/home/user/micromamba')
     docker_env = DockerEnv(docker_config)
     return docker_env
-
 
 
 def append_to_json(file_path, entry):
