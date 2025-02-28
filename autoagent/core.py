@@ -68,12 +68,12 @@ class MetaChain:
             self.logger = MetaChainLogger(log_path=log_path)
         # if self.logger.log_path is None: self.logger.info("[Warning] Not specific log path, so log will not be saved", "...", title="Log Path", color="light_cyan3")
         # else: self.logger.info("Log file is saved to", self.logger.log_path, "...", title="Log Path", color="light_cyan3")
-    # @retry(
-    #     stop=stop_after_attempt(4),
-    #     wait=wait_exponential(multiplier=1, min=4, max=60),
-    #     retry=should_retry_error,
-    #     before_sleep=lambda retry_state: print(f"Retrying... (attempt {retry_state.attempt_number})")
-    # )
+    @retry(
+        stop=stop_after_attempt(4),
+        wait=wait_exponential(multiplier=1, min=4, max=60),
+        retry=should_retry_error,
+        before_sleep=lambda retry_state: print(f"Retrying... (attempt {retry_state.attempt_number})")
+    )
     def get_chat_completion(
         self,
         agent: Agent,
