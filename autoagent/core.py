@@ -50,7 +50,7 @@ def should_retry_error(exception):
         "eof occurred" in error_msg,
         "timeout" in error_msg, 
         "event loop is closed" in error_msg,  # 添加事件循环错误
-        "anthropicexception" in error_msg     # 添加 Anthropic 相关错误
+        "anthropicexception" in error_msg,     # 添加 Anthropic 相关错误
     ])
 __CTX_VARS_NAME__ = "context_variables"
 logger = LoggerManager.get_logger()
@@ -68,12 +68,12 @@ class MetaChain:
             self.logger = MetaChainLogger(log_path=log_path)
         # if self.logger.log_path is None: self.logger.info("[Warning] Not specific log path, so log will not be saved", "...", title="Log Path", color="light_cyan3")
         # else: self.logger.info("Log file is saved to", self.logger.log_path, "...", title="Log Path", color="light_cyan3")
-    @retry(
-        stop=stop_after_attempt(4),
-        wait=wait_exponential(multiplier=1, min=4, max=60),
-        retry=should_retry_error,
-        before_sleep=lambda retry_state: print(f"Retrying... (attempt {retry_state.attempt_number})")
-    )
+    # @retry(
+    #     stop=stop_after_attempt(4),
+    #     wait=wait_exponential(multiplier=1, min=4, max=60),
+    #     retry=should_retry_error,
+    #     before_sleep=lambda retry_state: print(f"Retrying... (attempt {retry_state.attempt_number})")
+    # )
     def get_chat_completion(
         self,
         agent: Agent,
@@ -159,7 +159,10 @@ class MetaChain:
             completion_response = completion(**create_params)
             last_message = [{"role": "assistant", "content": completion_response.choices[0].message.content}]
             converted_message = convert_non_fncall_messages_to_fncall_messages(last_message, tools)
-            converted_tool_calls = [ChatCompletionMessageToolCall(**tool_call) for tool_call in converted_message[0]["tool_calls"]]
+            if "tool_calls" in converted_message[0]:
+                converted_tool_calls = [ChatCompletionMessageToolCall(**tool_call) for tool_call in converted_message[0]["tool_calls"]]
+            else: 
+                converted_tool_calls = None
             completion_response.choices[0].message = litellmMessage(content = converted_message[0]["content"], role = "assistant", tool_calls = converted_tool_calls)
 
         return completion_response
@@ -421,6 +424,10 @@ class MetaChain:
                     history.extend(partial_response.messages)
                     context_variables.update(partial_response.context_variables)
                     break
+                elif (not message.tool_calls) or not execute_tools:
+                    self.logger.info("Ending turn with no tool calls.", title="End Turn", color="red")
+                    break
+
             # if (message.tool_calls and message.tool_calls[0].function.name == "case_resolved") or not execute_tools:
             #     debug_print(debug, "Ending turn.", log_path=log_path, title="End Turn", color="red")
             #     break
@@ -597,6 +604,10 @@ class MetaChain:
                     history.extend(partial_response.messages)
                     context_variables.update(partial_response.context_variables)
                     break
+                elif (not message.tool_calls) or not execute_tools:
+                    self.logger.info("Ending turn with no tool calls.", title="End Turn", color="red")
+                    break
+
             # if (message.tool_calls and message.tool_calls[0].function.name == "case_resolved") or not execute_tools:
             #     debug_print(debug, "Ending turn.", log_path=log_path, title="End Turn", color="red")
             #     break
