@@ -3,13 +3,22 @@ import json
 import os
 from pathlib import Path
 import platform
+import os.path as osp
+from autoagent.environment.docker_env import DockerConfig
 class LocalEnv:
-    def __init__(self):
-        self.docker_workplace = os.getcwd()
-        if self.docker_workplace.endswith("autoagent"):
-            self.docker_workplace = os.path.dirname(self.docker_workplace)
-        self.local_workplace = self.docker_workplace
+    def __init__(self, docker_config: DockerConfig = None):
+        if docker_config is None:
+            self.docker_workplace = os.getcwd()
+            if self.docker_workplace.endswith("autoagent"):
+                self.docker_workplace = os.path.dirname(self.docker_workplace)
+            self.local_workplace = self.docker_workplace
+        else:
+            self.local_workplace = osp.join(docker_config.local_root, docker_config.workplace_name)
+            self.docker_workplace = osp.join(docker_config.local_root, docker_config.workplace_name)
+            os.makedirs(self.local_workplace, exist_ok=True)
         self.conda_sh = self._find_conda_sh()
+
+    
     def _find_conda_sh(self) -> str:
         """
         Find conda.sh file location across different environments
@@ -64,7 +73,7 @@ class LocalEnv:
         return None
     def run_command(self, command, stream_callback=None):
         assert self.conda_sh is not None, "Conda.sh not found"
-        modified_command = f"/bin/bash -c 'source {self.conda_sh} && conda activate browser && cd {self.docker_workplace} && {command}'"
+        modified_command = f"/bin/bash -c 'source {self.conda_sh} && conda activate auto && cd {self.docker_workplace} && {command}'"
         process = subprocess.Popen(modified_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
         output = ''
         while True:
@@ -87,4 +96,6 @@ class LocalEnv:
         return path
     
 if __name__ == "__main__":
-    print(str(Path.home()))
+    # print(str(Path.home()))
+    local_env = LocalEnv()
+    print(local_env.conda_sh)

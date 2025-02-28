@@ -92,7 +92,7 @@ def get_coding_agent(model: str, **kwargs):
     model=model,
     instructions=instructions,
     functions=tool_list,
-    examples=examples,
+    # examples=examples,
     tool_choice = "required", 
     parallel_tool_calls = False
     )

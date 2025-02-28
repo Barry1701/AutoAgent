@@ -23,6 +23,7 @@ from autoagent.tools.meta.edit_agents import list_agents
 from loop_utils.font_page import MC_LOGO, version_table, NOTES, GOODBYE_LOGO
 from rich.live import Live
 from autoagent.environment.docker_env import DockerEnv, DockerConfig, check_container_ports
+from autoagent.environment.local_env import LocalEnv
 from autoagent.environment.browser_env import BrowserEnv
 from autoagent.environment.markdown_browser import RequestsMarkdownBrowser
 from evaluation.utils import update_progress, check_port_available, run_evaluation, clean_msg
@@ -153,6 +154,19 @@ def create_environment(docker_config: DockerConfig):
     
     return code_env, web_env, file_env
 
+def create_environment_local(docker_config: DockerConfig):
+    """
+    1. create the code environment
+    2. create the web environment
+    3. create the file environment
+    """
+    code_env = LocalEnv(docker_config)
+
+    web_env = BrowserEnv(browsergym_eval_env = None, local_root=docker_config.local_root, workplace_name=docker_config.workplace_name)
+    file_env = RequestsMarkdownBrowser(viewport_size=1024 * 5, local_root=docker_config.local_root, workplace_name=docker_config.workplace_name, downloads_folder=os.path.join(docker_config.local_root, docker_config.workplace_name, "downloads"))
+    
+    return code_env, web_env, file_env
+
 def update_guidance(context_variables): 
     console = Console()
 
@@ -167,7 +181,8 @@ def update_guidance(context_variables):
 @click.option('--port', default=12347, help='the port to run the container')
 @click.option('--test_pull_name', default='autoagent_mirror', help='the name of the test pull')
 @click.option('--git_clone', default=True, help='whether to clone a mirror of the repository')
-def main(container_name: str, port: int, test_pull_name: str, git_clone: bool):
+@click.option('--local_env', default=False, help='whether to use local environment')
+def main(container_name: str, port: int, test_pull_name: str, git_clone: bool, local_env: bool):
     """
     Run deep research with a given model, container name, port
     """ 
@@ -188,7 +203,10 @@ def main(container_name: str, port: int, test_pull_name: str, git_clone: bool):
         LoggerManager.set_logger(MetaChainLogger(log_path = None))
         
         progress.update(task, description="[cyan]Creating environment...[/cyan]\n")
-        code_env, web_env, file_env = create_environment(docker_config)
+        if local_env:
+            code_env, web_env, file_env = create_environment_local(docker_config)
+        else:
+            code_env, web_env, file_env = create_environment(docker_config)
         
         progress.update(task, description="[cyan]Setting up autoagent...[/cyan]\n")
     
@@ -299,7 +317,8 @@ def user_mode(model: str, context_variables: dict, debug: bool = True):
 @cli.command(name='deep-research')  # 修改这里，使用连字符
 @click.option('--container_name', default='deepresearch', help='the function to get the agent')
 @click.option('--port', default=12346, help='the port to run the container')
-def deep_research(container_name: str, port: int):
+@click.option('--local_env', default=False, help='whether to use local environment')
+def deep_research(container_name: str, port: int, local_env: bool):
     """
     Run deep research with a given model, container name, port
     """ 
@@ -320,7 +339,10 @@ def deep_research(container_name: str, port: int):
         LoggerManager.set_logger(MetaChainLogger(log_path = None))
         
         progress.update(task, description="[cyan]Creating environment...[/cyan]\n")
-        code_env, web_env, file_env = create_environment(docker_config)
+        if local_env:
+            code_env, web_env, file_env = create_environment_local(docker_config)
+        else:
+            code_env, web_env, file_env = create_environment(docker_config)
         
         progress.update(task, description="[cyan]Setting up autoagent...[/cyan]\n")
     
