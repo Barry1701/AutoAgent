@@ -24,7 +24,7 @@ Welcome to AutoAgent! AutoAgent is a **Fully-Automated** and highly **Self-Devel
 
 ## ✨Key Features
 
-* 🏆 Top Performer on the GAIA Benchmark
+* 🏆 Top Performers on the GAIA Benchmark
 </br>AutoAgent has secured top rankings among open-sourced methods, delivering comparable performance to **OpenAI's Deep Research**.
 
 * 📚 Agentic-RAG with Native Self-Managing Vector Database
