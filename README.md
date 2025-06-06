@@ -20,6 +20,10 @@
   <hr>
 </div>
 
+<div align="center">
+<a href="https://trendshift.io/repositories/13954" target="_blank"><img src="https://trendshift.io/api/badge/repositories/13954" alt="HKUDS%2FAutoAgent | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+</div>
+
 Welcome to AutoAgent! AutoAgent is a **Fully-Automated** and highly **Self-Developing** framework that enables users to create and deploy LLM agents through **Natural Language Alone**. 
 
 ## ✨Key Features
