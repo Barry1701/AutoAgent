@@ -7,7 +7,7 @@ from autoagent.flow import default_drive, EventInput, ReturnBehavior
 from autoagent.flow.dynamic import goto_events, abort_this
 import re
 from autoagent import MetaChain
-from autoagent.types import Response
+from autoagent.types_custom import Response
 from autoagent.registry import register_workflow
 
 def extract_answer(response: str, key: str):

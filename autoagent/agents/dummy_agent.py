@@ -1,4 +1,4 @@
-from autoagent.types import Agent
+from autoagent.types_custom import Agent
 from autoagent.tools import tool_dummy
 from typing import Union
 from autoagent.registry import register_plugin_agent # import the register_agent function from the registry

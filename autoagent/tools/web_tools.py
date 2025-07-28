@@ -6,7 +6,7 @@ from browsergym.utils.obs import flatten_axtree_to_str
 from dataclasses import dataclass, field
 from typing import Dict
 from urllib.parse import quote_plus
-from autoagent.types import Result
+from autoagent.types_custom import Result
 from functools import partial, update_wrapper
 from inspect import signature
 import tiktoken

@@ -7,7 +7,7 @@ import time
 from autoagent.registry import register_tool, register_plugin_tool
 from typing import Union, Optional
 from typing import Optional
-from autoagent.types import Result
+from autoagent.types_custom import Result
 import requests
 import mimetypes
 import base64

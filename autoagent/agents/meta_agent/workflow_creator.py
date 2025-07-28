@@ -2,7 +2,7 @@ from autoagent.registry import register_agent
 from autoagent.tools.meta.edit_agents import list_agents, create_agent, delete_agent, run_agent, read_agent, create_orchestrator_agent
 from autoagent.tools.meta.edit_workflow import list_workflows, create_workflow, run_workflow
 from autoagent.tools.terminal_tools import execute_command, terminal_page_down, terminal_page_up, terminal_page_to
-from autoagent.types import Agent
+from autoagent.types_custom import Agent
 from autoagent.io_utils import read_file
 
 

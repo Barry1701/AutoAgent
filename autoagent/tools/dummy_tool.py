@@ -1,4 +1,4 @@
-from autoagent.types import Result, Agent
+from autoagent.types_custom import Result, Agent
 from typing import Union
 from autoagent.registry import register_plugin_tool
 

@@ -1,7 +1,7 @@
 from autoagent.registry import register_agent
 from autoagent.tools.meta.edit_agents import list_agents, create_agent, delete_agent, run_agent
 from autoagent.tools.terminal_tools import execute_command
-from autoagent.types import Agent
+from autoagent.types_custom import Agent
 from autoagent.io_utils import read_file
 
 @register_agent(name = "Agent Editor Agent", func_name="get_agent_editor_agent")

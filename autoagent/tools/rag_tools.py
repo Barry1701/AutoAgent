@@ -12,7 +12,7 @@ import shutil
 from autoagent.environment.markdown_browser.mdconvert import MarkdownConverter
 from autoagent.memory.utils import chunking_by_token_size
 import math
-from autoagent.types import Result
+from autoagent.types_custom import Result
 # @register_tool("load_db")
 # def load_db(db_path: str) -> str:
 
