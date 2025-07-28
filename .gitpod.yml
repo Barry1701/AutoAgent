@@ -1,0 +1,6 @@
+image: mcr.microsoft.com/playwright:v1.44.0-jammy
+
+tasks:
+  - init: |
+      pip install -r requirements.txt || true
+      playwright install

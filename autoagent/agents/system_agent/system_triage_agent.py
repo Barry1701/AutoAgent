@@ -2,7 +2,7 @@ from .filesurfer_agent import get_filesurfer_agent
 from .programming_agent import get_coding_agent
 from .websurfer_agent import get_websurfer_agent
 from autoagent.registry import register_agent
-from autoagent.types import Agent, Result
+from autoagent.types_custom import Agent, Result
 from autoagent.tools.inner import case_resolved, case_not_resolved
 
 @register_agent(name = "System Triage Agent", func_name="get_system_triage_agent")

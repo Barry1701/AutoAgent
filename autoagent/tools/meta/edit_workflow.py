@@ -6,7 +6,7 @@ from autoagent.tools.terminal_tools import create_file, create_directory, print_
 from autoagent.registry import register_tool
 import json
 from autoagent import MetaChain
-from autoagent.types import Response
+from autoagent.types_custom import Response
 import shlex
 from datetime import datetime
 from pydantic import BaseModel
@@ -20,7 +20,7 @@ from autoagent.flow import default_drive, EventInput, ReturnBehavior
 from autoagent.flow.dynamic import goto_events, abort_this
 import re
 from autoagent import MetaChain
-from autoagent.types import Response
+from autoagent.types_custom import Response
 from autoagent.registry import register_workflow
 
 def extract_answer(response: str, key: str):

@@ -20,7 +20,7 @@ import json
 from autoagent.environment.docker_env import DockerEnv, DockerConfig, check_container_ports, check_container_exist, check_container_running
 from autoagent.environment.browser_env import BrowserEnv
 from autoagent.environment.markdown_browser import RequestsMarkdownBrowser
-from autoagent.types import Response
+from autoagent.types_custom import Response
 from autoagent.util import function_to_json
 from autoagent.main import run_in_client, run_in_client_non_async
 from autoagent.agents.meta_agent.tool_editor import get_tool_editor_agent

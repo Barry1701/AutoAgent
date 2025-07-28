@@ -1,4 +1,4 @@
-from autoagent.types import Agent
+from autoagent.types_custom import Agent
 from autoagent.tools import (
     get_api_plugin_tools_doc
 )

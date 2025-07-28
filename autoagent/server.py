@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from typing import Dict, Any, Optional, List
 from autoagent.registry import registry
 from autoagent import MetaChain
-from autoagent.types import Agent, Response
+from autoagent.types_custom import Agent, Response
 import importlib
 import inspect
 

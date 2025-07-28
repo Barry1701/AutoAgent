@@ -1,4 +1,4 @@
-from autoagent.types import Agent
+from autoagent.types_custom import Agent
 from autoagent.tools import (
     push_changes, submit_pull_request
 )

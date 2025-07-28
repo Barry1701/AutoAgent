@@ -1,4 +1,4 @@
-from autoagent.types import Agent
+from autoagent.types_custom import Agent
 from autoagent.tools import (
     gen_code_tree_structure, execute_command, read_file, create_file, write_file, list_files, create_directory, run_python, terminal_page_up, terminal_page_down, terminal_page_to
 )

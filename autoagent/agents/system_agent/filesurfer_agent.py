@@ -1,4 +1,4 @@
-from autoagent.types import Agent
+from autoagent.types_custom import Agent
 from autoagent.registry import register_agent
 from autoagent.tools import open_local_file, page_up_markdown, page_down_markdown, find_on_page_ctrl_f, find_next, visual_question_answering
 from autoagent.tools.file_surfer_tool import with_env

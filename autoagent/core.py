@@ -7,7 +7,7 @@ from datetime import datetime
 # Local imports
 import os
 from .util import function_to_json, debug_print, merge_chunk, pretty_print_messages
-from .types import (
+from .types_custom import (
     Agent,
     AgentFunction,
     Message,

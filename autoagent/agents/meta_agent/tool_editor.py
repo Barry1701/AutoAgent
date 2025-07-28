@@ -3,7 +3,7 @@ from autoagent.tools.meta.edit_tools import list_tools, create_tool, delete_tool
 from autoagent.tools.meta.tool_retriever import get_api_plugin_tools_doc
 from autoagent.tools.meta.search_tools import search_trending_models_on_huggingface, get_hf_model_tools_doc
 
-from autoagent.types import Agent
+from autoagent.types_custom import Agent
 from autoagent.io_utils import read_file
 from autoagent.tools.terminal_tools import execute_command, terminal_page_down, terminal_page_up, terminal_page_to
 @register_agent(name = "Tool Editor Agent", func_name="get_tool_editor_agent")

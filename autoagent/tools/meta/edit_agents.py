@@ -195,7 +195,7 @@ def instructions(context_variables):
     tool_list = "[{}]".format(', '.join(f'{tool}' for tool in agent_tools))
 
     create_codes = f"""\
-from autoagent.types import Agent
+from autoagent.types_custom import Agent
 {tools_str}
 from autoagent.registry import register_plugin_agent
 
@@ -320,9 +320,9 @@ def instructions(context_variables):
     
 
     create_codes = f"""\
-from autoagent.types import Agent
+from autoagent.types_custom import Agent
 from autoagent.registry import register_plugin_agent
-from autoagent.types import Result  
+from autoagent.types_custom import Result  
 
 @register_plugin_agent(name = "{agent_name}", func_name="{agent_func}")
 def {agent_func}(model: str):

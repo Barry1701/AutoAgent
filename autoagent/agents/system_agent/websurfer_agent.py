@@ -1,4 +1,4 @@
-from autoagent.types import Agent
+from autoagent.types_custom import Agent
 from autoagent.registry import register_agent
 from autoagent.tools import click, page_down, page_up, history_back, history_forward, web_search, input_text, sleep, visit_url, get_page_markdown
 from autoagent.tools.web_tools import with_env
