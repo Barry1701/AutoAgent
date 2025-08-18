@@ -25,6 +25,9 @@
 import os
 import importlib
 from autoagent.registry import registry
+from .staff_directory_agent import staff_directory_agent
+
+__all__ = ["staff_directory_agent"]
 
 def import_agents_recursively(base_dir: str, base_package: str):
     """Recursively import all agents in .py files

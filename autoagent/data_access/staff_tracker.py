@@ -34,3 +34,11 @@ if __name__ == "__main__":
     print(tracker.get_employee_detail("John Smith", "Contact Number"))
     print(tracker.list_all_employees())
     print(tracker.available_fields())
+
+
+COLUMN_ALIASES = {
+    "PSA Licence expiry date": "PSA Licence exp. DD/MM/YYYY",
+    "PSA Licence exp": "PSA Licence exp. DD/MM/YYYY",
+    "PSA Licence expiry": "PSA Licence exp. DD/MM/YYYY",
+    "PSA Licence expiration": "PSA Licence exp. DD/MM/YYYY",
+}
