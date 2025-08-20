@@ -26,6 +26,8 @@ import os
 import importlib
 from autoagent.registry import registry
 from .staff_directory_agent import staff_directory_agent
+from .doors_agent import doors_agent
+
 
 __all__ = ["staff_directory_agent"]
 
