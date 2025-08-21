@@ -29,3 +29,6 @@ terminal_tmp/*
 !tool_docs.csv
 
 .port*
+
+# secrets
+autoagent/credentials/google-sa.json
