@@ -5,12 +5,14 @@ from typing import Dict, Any
 from autoagent.agents.staff_directory_agent import staff_directory_agent
 from autoagent.agents.camera_agent import camera_agent
 from autoagent.agents.doors_agent import doors_agent
+from autoagent.agents.operations_agent import operations_agent
 
 
 AGENTS = {
     "staff_directory_agent": staff_directory_agent,
     "camera_agent": camera_agent,
     "doors_agent": doors_agent,
+    "operations_agent": operations_agent,
 }
 
 
