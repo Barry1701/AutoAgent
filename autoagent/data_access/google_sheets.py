@@ -7,23 +7,44 @@ from typing import Optional
 from dotenv import load_dotenv
 import gspread
 
-# Wczytaj zmienne z .env
+# Load environment variables from a local .env if present. This mirrors the
+# previous behaviour while still allowing deployment environments to inject the
+# variables directly.
 load_dotenv()
 
+
 def _client() -> gspread.Client:
-    # 1) Najpierw spróbuj z Secret JSON w ENV
+    """Return an authenticated gspread client.
+
+    Preference is given to the GOOGLE_SA_JSON environment variable which is how
+    the production environment exposes the service account credentials. If that
+    is unavailable we fall back to GOOGLE_APPLICATION_CREDENTIALS which should
+    point at a service account JSON file on disk. When neither option is
+    configured we raise a clear error so the API does not fail silently.
+    """
+
     google_sa_json = os.getenv("GOOGLE_SA_JSON")
     if google_sa_json:
         try:
             creds_dict = json.loads(google_sa_json)
-            return gspread.service_account_from_dict(creds_dict)
-        except Exception as e:
-            raise RuntimeError(f"Nie udało się załadować GOOGLE_SA_JSON: {e}")
+        except json.JSONDecodeError as exc:
+            raise RuntimeError(
+                "Invalid JSON in GOOGLE_SA_JSON environment variable"
+            ) from exc
 
-    # 2) Fallback: plik ścieżką z GOOGLE_APPLICATION_CREDENTIALS
+        try:
+            return gspread.service_account_from_dict(creds_dict)
+        except Exception as exc:  # pragma: no cover - defensive: gspread may vary
+            raise RuntimeError(
+                "Failed to initialise Google Sheets client from GOOGLE_SA_JSON"
+            ) from exc
+
     cred_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
     if not cred_path:
-        raise RuntimeError("Brak GOOGLE_SA_JSON i GOOGLE_APPLICATION_CREDENTIALS w .env")
+        raise RuntimeError(
+            "Missing Google Sheets credentials: set GOOGLE_SA_JSON or "
+            "GOOGLE_APPLICATION_CREDENTIALS"
+        )
 
     p = Path(cred_path)
     if not p.is_absolute():
@@ -31,9 +52,17 @@ def _client() -> gspread.Client:
         p = (project_root / cred_path).resolve()
 
     if not p.exists():
-        raise RuntimeError(f"GOOGLE_APPLICATION_CREDENTIALS wskazuje na nieistniejący plik: {p}")
+        raise RuntimeError(
+            "GOOGLE_APPLICATION_CREDENTIALS points to a non-existent file: "
+            f"{p}"
+        )
 
-    return gspread.service_account(filename=str(p))
+    try:
+        return gspread.service_account(filename=str(p))
+    except Exception as exc:  # pragma: no cover - defensive: gspread may vary
+        raise RuntimeError(
+            "Failed to initialise Google Sheets client from file credentials"
+        ) from exc
 
 def get_worksheet(sheet_id: str, tab_name: Optional[str] = None):
     gc = _client()
