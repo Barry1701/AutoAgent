@@ -7,6 +7,9 @@ from typing import List, Tuple, Dict, Optional
 
 import pandas as pd
 
+# === NEW: Google Sheets helper ===
+from autoagent.data_access.google_sheets import get_worksheet
+
 # (opcjonalne) wsparcie LLM – nie jest wymagane do działania agenta
 try:
     from autoagent.utils.chatgpt import ask_openai  # noqa: F401
@@ -14,7 +17,7 @@ except Exception:
     def ask_openai(*args, **kwargs):
         return None
 
-
+# CSV fallback path (pozostawiamy)
 CSV_PATH = os.path.join("autoagent", "data", "Staff Tracker.csv")
 
 # --- Alias mapping (przyjazne frazy -> nazwy kolumn w pliku) ---
@@ -24,7 +27,7 @@ COLUMN_ALIASES_SINGLE: Dict[str, str] = {
     # PSA (nr)
     "psa licence": "PSA Licence",
     "psa license": "PSA Licence",
-    "psa": "PSA Licence",            # specjalnie obsłużymy grupowo
+    "psa": "PSA Licence",
     "psa number": "PSA Licence",
     "psa no": "PSA Licence",
     "psa id": "PSA Licence",
@@ -62,8 +65,8 @@ COLUMN_ALIAS_GROUPS: Dict[str, List[str]] = {
     "psa license": ["PSA Licence", "PSA Licence exp. DD/MM/YYYY"],
 }
 
-# TTL (sekundy) dla cache odczytu CSV
-CSV_TTL_SECONDS = 300
+# TTL 5 min dla cache
+TTL_SECONDS = 300
 
 
 def _clean_name(name: str) -> str:
@@ -79,29 +82,52 @@ def _name_tokens(clean_name: str) -> List[str]:
     return [t for t in re.split(r"[^\w]+", clean_name) if t]
 
 
-# --- Mechanizm cache z TTL oparty o lru_cache + bucket czasu ---
+# === CSV cache (fallback) ===
 
-@lru_cache(maxsize=128)
-def _load_df_cached(filepath: str, time_bucket: int) -> pd.DataFrame:
-    """Wczytuje CSV, wynik cache’owany przez bucket czasu (TTL)."""
+@lru_cache(maxsize=64)
+def _load_df_cached_csv(filepath: str, time_bucket: int) -> pd.DataFrame:
     if not os.path.exists(filepath):
         raise FileNotFoundError(f"CSV not found at: {os.path.abspath(filepath)}")
     return pd.read_csv(filepath).fillna("")
 
 
-def _load_df_ttl(filepath: str, ttl_seconds: int) -> pd.DataFrame:
-    """Zwraca DataFrame z TTL – nowy bucket co ttl_seconds."""
-    bucket = int(time.time() // ttl_seconds)
-    return _load_df_cached(filepath, bucket)
+# === GOOGLE SHEETS cache ===
+
+@lru_cache(maxsize=64)
+def _load_df_cached_gsheet(sheet_id: str, tab_name: str, time_bucket: int) -> pd.DataFrame:
+    ws = get_worksheet(sheet_id, tab_name or None)
+    records = ws.get_all_records()
+    df = pd.DataFrame(records).fillna("")
+    return df
+
+
+def _load_staff_df() -> pd.DataFrame:
+    """
+    Źródło danych sterowane ENV:
+      - STAFF_SOURCE=google -> Google Sheets (STAFF_SHEET_ID + STAFF_SHEET_TAB)
+      - inaczej -> CSV fallback
+    """
+    source = (os.getenv("STAFF_SOURCE") or "csv").lower()
+    if source == "google":
+        sheet_id = os.getenv("STAFF_SHEET_ID")
+        tab_name = os.getenv("STAFF_SHEET_TAB") or "Sheet1"
+        if not sheet_id:
+            raise RuntimeError("STAFF_SOURCE=google, ale brak STAFF_SHEET_ID w .env")
+        bucket = int(time.time() // TTL_SECONDS)
+        return _load_df_cached_gsheet(sheet_id, tab_name, bucket)
+
+    # fallback: CSV
+    bucket = int(time.time() // TTL_SECONDS)
+    return _load_df_cached_csv(CSV_PATH, bucket)
 
 
 class StaffDirectory:
     def __init__(self, filepath: str = CSV_PATH):
-        self.filepath = filepath
-        self.df = _load_df_ttl(self.filepath, CSV_TTL_SECONDS)
+        # Niezależnie od filepath używamy _load_staff_df(), które respektuje ENV
+        self.df = _load_staff_df()
 
         if "Name" not in self.df.columns:
-            raise ValueError("CSV must contain a 'Name' column.")
+            raise ValueError("Data source must contain a 'Name' column.")
 
         # pomocnicza kolumna do dopasowania po imieniu/nazwisku
         self.df["__clean_name__"] = self.df["Name"].apply(_clean_name)
@@ -111,16 +137,13 @@ class StaffDirectory:
 
     @staticmethod
     def clear_cache():
-        """Czyści cache CSV (używane przy refresh=1)."""
-        _load_df_cached.cache_clear()
+        """Czyści cache (zarówno Google Sheets jak i CSV)."""
+        _load_df_cached_gsheet.cache_clear()
+        _load_df_cached_csv.cache_clear()
 
     # ---------- Name matching ----------
 
     def find_best_name_in_text(self, text: str) -> Optional[str]:
-        """
-        Najpierw próbuje znaleźć pełny clean_name jako podciąg zapytania.
-        Jeśli się nie uda, stosuje dopasowanie częściowe po tokenach imienia/nazwiska.
-        """
         t = text.lower()
         # 1) pełny podciąg
         best = None
@@ -134,8 +157,8 @@ class StaffDirectory:
         if best:
             return best
 
-        # 2) częściowe dopasowanie po tokenach (np. samo "bartosz" albo "greplowski")
-        token_hits: List[Tuple[str, int, int]] = []  # (clean_name, matched_tokens, total_tokens)
+        # 2) częściowe dopasowanie po tokenach
+        token_hits: List[Tuple[str, int, int]] = []
         q_tokens = set(_name_tokens(t))
         for clean_name in self.df["__clean_name__"]:
             tokens = _name_tokens(clean_name)
@@ -148,22 +171,13 @@ class StaffDirectory:
         if not token_hits:
             return None
 
-        # sortuj: najwiecej trafionych tokenów, potem dłuższe nazwisko (więcej tokenów)
         token_hits.sort(key=lambda x: (x[1], x[2]), reverse=True)
-
-        # jeżeli top jest jednoznaczny (wyraźnie wygrywa liczbą trafień), zwróć go
         top = token_hits[0]
-        # sprawdź czy drugi nie ma tyle samo trafień
         if len(token_hits) == 1 or top[1] > token_hits[1][1]:
             return top[0]
-
-        # w przeciwnym razie zwróć None (pozwolimy warstwie wyżej wyświetlić listę kandydatów)
         return None
 
     def list_name_candidates(self, text: str, limit: int = 5) -> List[str]:
-        """
-        Zwraca listę potencjalnych dopasowań po tokenach (do podpowiedzi).
-        """
         t = text.lower()
         q_tokens = set(_name_tokens(t))
         scored: List[Tuple[str, int, int]] = []
@@ -186,7 +200,6 @@ class StaffDirectory:
     # ---------- Field (column) matching ----------
 
     def _columns_present(self, wanted: List[str]) -> List[str]:
-        """Zwraca listę kolumn istniejących w CSV (case-insensitive)."""
         present = []
         for w in wanted:
             real = self._col_lc_map.get(w.strip().lower())
@@ -195,13 +208,6 @@ class StaffDirectory:
         return present
 
     def infer_fields_from_text(self, text: str) -> List[str]:
-        """
-        Analiza pytania i dopasowanie kolumn:
-        - jeśli pada słowo odpowiadające wygaśnięciu (expiry), wybierz tylko expiry
-        - jeśli 'psa' (ogólnie), zwróć nr + expiry
-        - w przeciwnym razie dopasuj aliasy pojedyncze
-        - fallback: jakiekolwiek kolumny z 'exp'/'expiry'
-        """
         t = text.lower()
 
         # 1) Konkretnie "expiry" / "expiration"
@@ -225,7 +231,7 @@ class StaffDirectory:
         if hits:
             return self._columns_present(hits)
 
-        # 4) Ostatnia próba – szukaj kolumn z "exp"/"expiry"
+        # 4) Ostatnia próba – cokolwiek z "exp"/"expiry"
         expiry_like = [c for c in self.df.columns if ("exp" in c.lower() or "expiry" in c.lower())]
         if expiry_like:
             return self._columns_present(expiry_like[:1])
@@ -235,7 +241,6 @@ class StaffDirectory:
     # ---------- Value retrieval ----------
 
     def get_values(self, record: Dict, fields: List[str]) -> List[Tuple[str, str]]:
-        """Dla każdego pola zwraca (etykieta, wartość/N/A)."""
         out: List[Tuple[str, str]] = []
         for f in fields:
             val = record.get(f, "")
@@ -254,7 +259,7 @@ def staff_directory_agent(query: str, context: dict = {}) -> str:
       - "Give me contact number for Adam Quirke"
       - "emergency contact Adam Quirke"
     """
-    # Obsługa refresh=1 (np. po zmianie CSV)
+    # Obsługa refresh=1 (np. po zmianie danych w Google Sheet)
     if str(context.get("refresh", "0")) == "1":
         StaffDirectory.clear_cache()
 
@@ -263,7 +268,6 @@ def staff_directory_agent(query: str, context: dict = {}) -> str:
     # 1) Dopasuj pracownika po tekście (pełne lub częściowe)
     clean_name = directory.find_best_name_in_text(query)
     if not clean_name:
-        # spróbuj zasugerować kandydatów
         candidates = directory.list_name_candidates(query, limit=5)
         if candidates:
             return (
