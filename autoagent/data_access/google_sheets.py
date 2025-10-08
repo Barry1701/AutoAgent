@@ -1,70 +1,75 @@
 # autoagent/data_access/google_sheets.py
-import os
 import json
+import os
 from pathlib import Path
 from typing import Optional
 
 from dotenv import load_dotenv
 import gspread
 
-# Load environment variables from a local .env if present. This mirrors the
-# previous behaviour while still allowing deployment environments to inject the
-# variables directly.
+# Wczytaj .env (lokalnie); w Codex zmienne są już w środowisku
 load_dotenv()
 
 
 def _client() -> gspread.Client:
-    """Return an authenticated gspread client.
-
-    Preference is given to the GOOGLE_SA_JSON environment variable which is how
-    the production environment exposes the service account credentials. If that
-    is unavailable we fall back to GOOGLE_APPLICATION_CREDENTIALS which should
-    point at a service account JSON file on disk. When neither option is
-    configured we raise a clear error so the API does not fail silently.
     """
-
-    google_sa_json = os.getenv("GOOGLE_SA_JSON")
-    if google_sa_json:
+    Kolejność źródeł poświadczeń:
+    1) GOOGLE_SA_JSON  – cały JSON serwisowego konta w jednej zmiennej (sekret)
+    2) GOOGLE_APPLICATION_CREDENTIALS – ścieżka do pliku z JSON
+    """
+    sa_json = os.getenv("GOOGLE_SA_JSON")
+    if sa_json:
         try:
-            creds_dict = json.loads(google_sa_json)
-        except json.JSONDecodeError as exc:
+            # Sekrety zwykle nie mają nowych linii -> zwykłe json.loads
+            data = json.loads(sa_json)
+        except Exception as e:
             raise RuntimeError(
-                "Invalid JSON in GOOGLE_SA_JSON environment variable"
-            ) from exc
+                "GOOGLE_SA_JSON is set but is not valid JSON (cannot json.loads). "
+                "Paste the *entire* service-account JSON as the value."
+            ) from e
 
         try:
-            return gspread.service_account_from_dict(creds_dict)
-        except Exception as exc:  # pragma: no cover - defensive: gspread may vary
+            # gspread ma wygodny helper do dict
+            return gspread.service_account_from_dict(data)
+        except Exception as e:
             raise RuntimeError(
-                "Failed to initialise Google Sheets client from GOOGLE_SA_JSON"
-            ) from exc
+                "Failed to initialize Google Sheets client from GOOGLE_SA_JSON dict."
+            ) from e
 
+    # Fallback: plik
     cred_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-    if not cred_path:
-        raise RuntimeError(
-            "Missing Google Sheets credentials: set GOOGLE_SA_JSON or "
-            "GOOGLE_APPLICATION_CREDENTIALS"
-        )
+    if cred_path:
+        p = Path(cred_path)
+        if not p.is_absolute():
+            # plik w repo -> przelicz względem root projektu
+            project_root = Path(__file__).resolve().parents[2]
+            p = (project_root / cred_path).resolve()
 
-    p = Path(cred_path)
-    if not p.is_absolute():
-        project_root = Path(__file__).resolve().parents[2]
-        p = (project_root / cred_path).resolve()
+        if not p.exists():
+            raise RuntimeError(
+                f"GOOGLE_APPLICATION_CREDENTIALS points to a non-existing file: {p}"
+            )
 
-    if not p.exists():
-        raise RuntimeError(
-            "GOOGLE_APPLICATION_CREDENTIALS points to a non-existent file: "
-            f"{p}"
-        )
+        try:
+            return gspread.service_account(filename=str(p))
+        except Exception as e:
+            raise RuntimeError(
+                "Failed to initialise Google Sheets client from file credentials"
+            ) from e
 
-    try:
-        return gspread.service_account(filename=str(p))
-    except Exception as exc:  # pragma: no cover - defensive: gspread may vary
-        raise RuntimeError(
-            "Failed to initialise Google Sheets client from file credentials"
-        ) from exc
+    # Jeśli nic nie ustawione:
+    raise RuntimeError(
+        "No Google credentials found. Set GOOGLE_SA_JSON (recommended) "
+        "or GOOGLE_APPLICATION_CREDENTIALS (path to JSON file)."
+    )
+
 
 def get_worksheet(sheet_id: str, tab_name: Optional[str] = None):
+    """
+    Zwraca gspread.Worksheet dla danego arkusza/zakładki.
+    - sheet_id: ID pliku Google Sheets (z URL)
+    - tab_name: nazwa zakładki; jeśli None -> sheet1
+    """
     gc = _client()
     sh = gc.open_by_key(sheet_id)
     return sh.worksheet(tab_name) if tab_name else sh.sheet1
