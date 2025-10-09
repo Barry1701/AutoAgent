@@ -7,7 +7,7 @@ load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def ask_openai(prompt: str, model="gpt-4") -> str:
+def ask_openai(prompt: str, model="gpt-5") -> str:
     response = client.chat.completions.create(
         model=model,
         messages=[
