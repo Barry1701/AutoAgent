@@ -16,10 +16,11 @@ FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
 
 app = FastAPI(title="AutoAgent API", version="0.1.0")
 
+# 🔧 Zmieniona konfiguracja CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_origin_regex=r"^https://.*\.gitpod\.io$",
+    allow_origins=[FRONTEND_ORIGIN, "http://localhost:5173"],
+    allow_origin_regex=r"^https://.*\.gitpod\.io$|^https://.*\.herokuapp\.com$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
