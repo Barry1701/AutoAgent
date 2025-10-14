@@ -12,3 +12,4 @@ google-auth-httplib2
 gspread
 python-dotenv
 tenacity>=8.2.2
+pandas
