@@ -81,18 +81,28 @@ def _parse_site_from_query(q: str) -> Optional[str]:
     return None
 
 
-def _extract_cam_number(text: str) -> Optional[str]:
+# --- precyzyjny wyciąg numeru z tekstu ---
+
+_end_paren_digits = re.compile(r"\((\d{1,6})\)\s*$")        # ... (123)  ← tylko na końcu
+_hash_digits      = re.compile(r"(?:^|[^0-9])#\s*(\d{1,6})") # #123  lub  foo # 123
+
+def _extract_cam_number_precise(text: str) -> Optional[str]:
     """
-    Try to extract a camera-like number from text, e.g. '(204)' -> '204' or '#204' -> '204'.
+    Zwraca numer kamery tylko gdy:
+      - na KOŃCU tekstu są nawiasy z samymi cyframi: ... (123)
+      - lub gdzieś występuje #123
+    NIE łapie '(G11)', '(F01)' itp.
     """
     if not text:
         return None
-    m = re.search(r"(?:^|[^0-9])(#[ ]*\d{1,4}|\(\s*\d{1,4}\s*\)|\b\d{1,4}\b)", str(text))
-    if not m:
-        return None
-    token = m.group(1)
-    digits = re.sub(r"[^\d]", "", token)
-    return digits or None
+    s = str(text)
+    m = _end_paren_digits.search(s)
+    if m:
+        return m.group(1)
+    m = _hash_digits.search(s)
+    if m:
+        return m.group(1)
+    return None
 
 
 def _digits_from_query(q: str) -> Optional[str]:
@@ -139,12 +149,15 @@ def invalidate_cache():
 def search(query: str, limit: int = 10) -> List[Dict]:
     """
     Simple search by camera number or fragment of camera name/description.
-    The search:
-      1) Optionally narrows to PPK1/PPK2 if mentioned in query.
-      2) Tries 'number' and 'name/description' columns first.
-      3) Falls back to 'any text column contains <query>' if needed.
-    It also forces the displayed camera number to the digits from the query
-    (e.g., '204'), if present, to avoid accidental numbers in headers (like '(389)').
+
+    Kolejność:
+      1) jeśli w pytaniu jest numer (np. 118) → najpierw szukamy WIERSZY, z których
+         da się precyzyjnie wyciągnąć taki numer (ostatnie nawiasy lub #123),
+      2) jeśli brak hitów – miękki substring po kolumnach 'number/name',
+      3) dalej – fallback: substring po dowolnej kolumnie.
+
+    W wyniku _number zawsze ustawiamy na numer z pytania (jeśli był), aby nie „przesiąkały”
+    przypadkowe liczby z opisu (np. (389)).
     """
     df = load_all()
     if df.empty:
@@ -160,20 +173,37 @@ def search(query: str, limit: int = 10) -> List[Dict]:
 
     col_num, col_name = _infer_number_and_name_columns(df)
     ql = q.lower()
-    wanted_digits = _digits_from_query(q)  # <<< kluczowa linia – numer z pytania
+    wanted_digits = _digits_from_query(q)
 
-    # ---- primary matching on number/name columns
-    mask = pd.Series([False] * len(df))
-    if col_num and df[col_num].notna().any():
-        mask |= df[col_num].astype(str).str.lower().str.contains(ql, na=False)
-    if col_name and df[col_name].notna().any():
-        mask |= df[col_name].astype(str).str.lower().str.contains(ql, na=False)
+    # ---- 1) precyzyjne dopasowanie po numerze
+    hits = pd.DataFrame()
+    if wanted_digits:
+        def row_has_wanted(row) -> bool:
+            cand = None
+            if col_num:
+                cand = _extract_cam_number_precise(str(row.get(col_num, "")))
+            if not cand and col_name:
+                cand = _extract_cam_number_precise(str(row.get(col_name, "")))
+            return cand == wanted_digits
 
-    hits = df[mask]
+        mask_num = df.apply(row_has_wanted, axis=1)
+        hits = df[mask_num]
 
-    # ---- fallback: scan any column (stringified)
+    # ---- 2) jeśli nie ma trafień po numerze → miękki match po number/name
     if hits.empty:
-        any_mask = df.astype(str).apply(lambda row: row.str.lower().str.contains(ql, na=False).any(), axis=1)
+        mask = pd.Series([False] * len(df))
+        if col_num and df[col_num].notna().any():
+            mask |= df[col_num].astype(str).str.lower().str.contains(ql, na=False)
+        if col_name and df[col_name].notna().any():
+            mask |= df[col_name].astype(str).str.lower().str.contains(ql, na=False)
+        hits = df[mask]
+
+    # ---- 3) fallback: substring po dowolnej kolumnie
+    if hits.empty:
+        any_mask = df.astype(str).apply(
+            lambda row: row.str.lower().str.contains(ql, na=False).any(),
+            axis=1
+        )
         hits = df[any_mask]
 
     if hits.empty:
@@ -184,21 +214,21 @@ def search(query: str, limit: int = 10) -> List[Dict]:
     seen: Set[Tuple[str, str, str]] = set()
 
     if col_num or col_name:
-        # Normal layout
         for _, row in hits.iterrows():
             site_lbl = row.get("__site__", "")
-            # prefer number column; otherwise try to extract from name
+
+            # numer do wyświetlenia – jeśli był w pytaniu, to go wymuszamy
             if wanted_digits:
                 cam_no = wanted_digits
             else:
                 cam_no = None
                 if col_num:
-                    cam_no = _extract_cam_number(str(row.get(col_num, "")))
+                    cam_no = _extract_cam_number_precise(str(row.get(col_num, "")))
                 if not cam_no and col_name:
-                    cam_no = _extract_cam_number(str(row.get(col_name, "")))
+                    cam_no = _extract_cam_number_precise(str(row.get(col_name, "")))
                 cam_no = cam_no or ""
 
-            # pick a display name/description
+            # opis do wyświetlenia
             name_val = ""
             if col_name:
                 name_val = str(row.get(col_name, "")).strip()
@@ -217,9 +247,8 @@ def search(query: str, limit: int = 10) -> List[Dict]:
                 "_row": dict(row),
             })
     else:
-        # Unusual layout: headers might be actual camera titles; values may contain other titles.
-        # We iterate headers/values and build matches.
-        for r_idx, row in hits.iterrows():
+        # Bardzo nietypowy layout – skanujemy nagłówki/komórki.
+        for _, row in hits.iterrows():
             site_lbl = row.get("__site__", "")
             for header in hits.columns:
                 val = row.get(header, "")
@@ -228,13 +257,10 @@ def search(query: str, limit: int = 10) -> List[Dict]:
                 if not h and not v:
                     continue
                 if ql in h.lower() or ql in v.lower():
-                    # Force number from query if present; otherwise extract from header/value.
                     if wanted_digits:
                         cam_no = wanted_digits
                     else:
-                        cam_no = _extract_cam_number(h) or _extract_cam_number(v) or ""
-
-                    # Display name: prefer header (bo zdarza się, że to opis kamery)
+                        cam_no = _extract_cam_number_precise(h) or _extract_cam_number_precise(v) or ""
                     disp = h if len(h) >= len(v) else v
 
                     key = (site_lbl, cam_no, disp)
@@ -249,6 +275,4 @@ def search(query: str, limit: int = 10) -> List[Dict]:
                         "_row": dict(row),
                     })
 
-    # deduplicate & limit
-    out = out[: max(1, limit)]
-    return out
+    return out[: max(1, limit)]
