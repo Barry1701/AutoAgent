@@ -148,68 +148,73 @@ def invalidate_cache():
 
 def search(query: str, limit: int = 10) -> List[Dict]:
     """
-    Simple search by camera number or fragment of camera name/description.
-
-    Kolejność:
-      1) jeśli w pytaniu jest numer (np. 118) → najpierw szukamy WIERSZY, z których
-         da się precyzyjnie wyciągnąć taki numer (ostatnie nawiasy lub #123),
-      2) jeśli brak hitów – miękki substring po kolumnach 'number/name',
-      3) dalej – fallback: substring po dowolnej kolumnie.
-
-    W wyniku _number zawsze ustawiamy na numer z pytania (jeśli był), aby nie „przesiąkały”
-    przypadkowe liczby z opisu (np. (389)).
+    Szukanie kamer:
+      1) jeśli w zapytaniu są cyfry (np. 118) — szukamy po tym numerze,
+         najpierw w kolumnach numeru/nazwy, a jeśli nic — w dowolnej kolumnie.
+      2) jeśli nie ma cyfr albo nic nie znaleziono, wracamy do wyszukiwania
+         całej frazy (obecna logika).
     """
     df = load_all()
     if df.empty:
         return []
 
-    q = str(query or "").strip()
+    q = (query or "").strip()
     if not q:
         return []
 
+    # opcjonalne zawężenie do PPK1 / PPK2
     site = _parse_site_from_query(q)
     if site:
         df = df[df["__site__"] == site]
 
     col_num, col_name = _infer_number_and_name_columns(df)
     ql = q.lower()
-    wanted_digits = _digits_from_query(q)
 
-    # ---- 1) precyzyjne dopasowanie po numerze
+    # <<< NOWE: cyfry z zapytania
+    wanted_digits = _digits_from_query(q)  # np. "118"
     hits = pd.DataFrame()
+
     if wanted_digits:
-        def row_has_wanted(row) -> bool:
-            cand = None
-            if col_num:
-                cand = _extract_cam_number_precise(str(row.get(col_num, "")))
-            if not cand and col_name:
-                cand = _extract_cam_number_precise(str(row.get(col_name, "")))
-            return cand == wanted_digits
+        # dopasowanie numeru jako "samodzielnego" ciągu (bez sąsiednich cyfr)
+        patt = re.compile(rf"(?<!\d){re.escape(wanted_digits)}(?!\d)")
 
-        mask_num = df.apply(row_has_wanted, axis=1)
-        hits = df[mask_num]
+        mask_digits = pd.Series([False] * len(df))
+        if col_num and df[col_num].notna().any():
+            mask_digits |= df[col_num].astype(str).str.contains(patt, regex=True, na=False)
+        if col_name and df[col_name].notna().any():
+            mask_digits |= df[col_name].astype(str).str.contains(patt, regex=True, na=False)
 
-    # ---- 2) jeśli nie ma trafień po numerze → miękki match po number/name
+        hits = df[mask_digits]
+
+        # fallback: przeszukaj dowolną kolumnę po samych cyfrach
+        if hits.empty:
+            any_mask_digits = df.apply(
+                lambda row: any(patt.search(str(v)) for v in row.values),
+                axis=1
+            )
+            hits = df[any_mask_digits]
+
+    # Jeśli nic po cyfrach, użyj dotychczasowej logiki pełnej frazy
     if hits.empty:
         mask = pd.Series([False] * len(df))
         if col_num and df[col_num].notna().any():
             mask |= df[col_num].astype(str).str.lower().str.contains(ql, na=False)
         if col_name and df[col_name].notna().any():
             mask |= df[col_name].astype(str).str.lower().str.contains(ql, na=False)
+
         hits = df[mask]
 
-    # ---- 3) fallback: substring po dowolnej kolumnie
-    if hits.empty:
-        any_mask = df.astype(str).apply(
-            lambda row: row.str.lower().str.contains(ql, na=False).any(),
-            axis=1
-        )
-        hits = df[any_mask]
+        if hits.empty:
+            any_mask = df.astype(str).apply(
+                lambda row: row.str.lower().str.contains(ql, na=False).any(),
+                axis=1
+            )
+            hits = df[any_mask]
 
     if hits.empty:
         return []
 
-    # ---- build result rows
+    # --- budowa wyników: preferuj numer z zapytania, jeśli był
     out: List[Dict] = []
     seen: Set[Tuple[str, str, str]] = set()
 
@@ -217,18 +222,16 @@ def search(query: str, limit: int = 10) -> List[Dict]:
         for _, row in hits.iterrows():
             site_lbl = row.get("__site__", "")
 
-            # numer do wyświetlenia – jeśli był w pytaniu, to go wymuszamy
             if wanted_digits:
                 cam_no = wanted_digits
             else:
                 cam_no = None
                 if col_num:
-                    cam_no = _extract_cam_number_precise(str(row.get(col_num, "")))
+                    cam_no = _extract_cam_number(str(row.get(col_num, "")))
                 if not cam_no and col_name:
-                    cam_no = _extract_cam_number_precise(str(row.get(col_name, "")))
+                    cam_no = _extract_cam_number(str(row.get(col_name, "")))
                 cam_no = cam_no or ""
 
-            # opis do wyświetlenia
             name_val = ""
             if col_name:
                 name_val = str(row.get(col_name, "")).strip()
@@ -247,7 +250,7 @@ def search(query: str, limit: int = 10) -> List[Dict]:
                 "_row": dict(row),
             })
     else:
-        # Bardzo nietypowy layout – skanujemy nagłówki/komórki.
+        # dziwne layouty – jak w Twoim pierwotnym kodzie
         for _, row in hits.iterrows():
             site_lbl = row.get("__site__", "")
             for header in hits.columns:
@@ -256,11 +259,9 @@ def search(query: str, limit: int = 10) -> List[Dict]:
                 v = str(val).strip()
                 if not h and not v:
                     continue
+
                 if ql in h.lower() or ql in v.lower():
-                    if wanted_digits:
-                        cam_no = wanted_digits
-                    else:
-                        cam_no = _extract_cam_number_precise(h) or _extract_cam_number_precise(v) or ""
+                    cam_no = wanted_digits or _extract_cam_number(h) or _extract_cam_number(v) or ""
                     disp = h if len(h) >= len(v) else v
 
                     key = (site_lbl, cam_no, disp)
