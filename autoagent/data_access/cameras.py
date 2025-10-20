@@ -148,73 +148,57 @@ def invalidate_cache():
 
 def search(query: str, limit: int = 10) -> List[Dict]:
     """
-    Szukanie kamer:
-      1) jeśli w zapytaniu są cyfry (np. 118) — szukamy po tym numerze,
-         najpierw w kolumnach numeru/nazwy, a jeśli nic — w dowolnej kolumnie.
-      2) jeśli nie ma cyfr albo nic nie znaleziono, wracamy do wyszukiwania
-         całej frazy (obecna logika).
+    Proste wyszukiwanie po numerze kamery lub fragmencie nazwy/opisu.
+    Logika:
+      1) Zawężamy do PPK1/PPK2 jeśli w pytaniu jest wzmianka.
+      2) Jeśli w pytaniu występuje numer (np. '118'), traktujemy go jako
+         główny klucz wyszukiwania (zamiast pełnego tekstu 'camera 118').
+      3) Najpierw próbujemy po kolumnach 'number' i 'name/description',
+         a potem fallback: dowolna kolumna zawiera klucz.
     """
     df = load_all()
     if df.empty:
         return []
 
-    q = (query or "").strip()
+    q = str(query or "").strip()
     if not q:
         return []
 
-    # opcjonalne zawężenie do PPK1 / PPK2
+    # zawężenie do PPK1/PPK2
     site = _parse_site_from_query(q)
     if site:
         df = df[df["__site__"] == site]
 
     col_num, col_name = _infer_number_and_name_columns(df)
+
+    # klucze do szukania
     ql = q.lower()
+    wanted_digits = _digits_from_query(q)              # np. "118" z "camera 118"
+    effective_term = (wanted_digits or ql)             # <-- NAJWAŻNIEJSZE: szukamy już po samych cyfrach, jeśli są
 
-    # <<< NOWE: cyfry z zapytania
-    wanted_digits = _digits_from_query(q)  # np. "118"
-    hits = pd.DataFrame()
+    # ---- primary: number/name
+    mask = pd.Series(False, index=df.index)
+    if col_num and df[col_num].notna().any():
+        mask |= df[col_num].astype(str).str.lower().str.contains(effective_term, na=False)
+    if col_name and df[col_name].notna().any():
+        mask |= df[col_name].astype(str).str.lower().str.contains(effective_term, na=False)
 
-    if wanted_digits:
-        # dopasowanie numeru jako "samodzielnego" ciągu (bez sąsiednich cyfr)
-        patt = re.compile(rf"(?<!\d){re.escape(wanted_digits)}(?!\d)")
+    hits = df[mask]
 
-        mask_digits = pd.Series([False] * len(df))
-        if col_num and df[col_num].notna().any():
-            mask_digits |= df[col_num].astype(str).str.contains(patt, regex=True, na=False)
-        if col_name and df[col_name].notna().any():
-            mask_digits |= df[col_name].astype(str).str.contains(patt, regex=True, na=False)
-
-        hits = df[mask_digits]
-
-        # fallback: przeszukaj dowolną kolumnę po samych cyfrach
-        if hits.empty:
-            any_mask_digits = df.apply(
-                lambda row: any(patt.search(str(v)) for v in row.values),
-                axis=1
-            )
-            hits = df[any_mask_digits]
-
-    # Jeśli nic po cyfrach, użyj dotychczasowej logiki pełnej frazy
+    # ---- fallback: każda kolumna
     if hits.empty:
-        mask = pd.Series([False] * len(df))
-        if col_num and df[col_num].notna().any():
-            mask |= df[col_num].astype(str).str.lower().str.contains(ql, na=False)
-        if col_name and df[col_name].notna().any():
-            mask |= df[col_name].astype(str).str.lower().str.contains(ql, na=False)
-
-        hits = df[mask]
-
-        if hits.empty:
-            any_mask = df.astype(str).apply(
-                lambda row: row.str.lower().str.contains(ql, na=False).any(),
-                axis=1
-            )
-            hits = df[any_mask]
+        # najpierw spróbujmy po 'effective_term' (czyli po cyfrach, jeśli są),
+        # bo to unifikuje zachowanie '118' == 'camera 118'
+        any_mask = df.astype(str).apply(
+            lambda row: row.str.lower().str.contains(effective_term, na=False).any(),
+            axis=1
+        )
+        hits = df[any_mask]
 
     if hits.empty:
         return []
 
-    # --- budowa wyników: preferuj numer z zapytania, jeśli był
+    # ---- budowa wyników
     out: List[Dict] = []
     seen: Set[Tuple[str, str, str]] = set()
 
@@ -222,6 +206,8 @@ def search(query: str, limit: int = 10) -> List[Dict]:
         for _, row in hits.iterrows():
             site_lbl = row.get("__site__", "")
 
+            # jeśli w pytaniu był numer – pokażemy ten numer;
+            # inaczej spróbujemy wyciągnąć z danych
             if wanted_digits:
                 cam_no = wanted_digits
             else:
@@ -250,20 +236,23 @@ def search(query: str, limit: int = 10) -> List[Dict]:
                 "_row": dict(row),
             })
     else:
-        # dziwne layouty – jak w Twoim pierwotnym kodzie
+        # nietypowy układ (np. tylko jedna kolumna z długim opisem)
         for _, row in hits.iterrows():
             site_lbl = row.get("__site__", "")
             for header in hits.columns:
-                val = row.get(header, "")
                 h = str(header).strip()
-                v = str(val).strip()
+                v = str(row.get(header, "")).strip()
                 if not h and not v:
                     continue
 
-                if ql in h.lower() or ql in v.lower():
-                    cam_no = wanted_digits or _extract_cam_number(h) or _extract_cam_number(v) or ""
-                    disp = h if len(h) >= len(v) else v
+                # dopasowanie po effective_term (czyli po cyfrach, jeśli są)
+                if effective_term in h.lower() or effective_term in v.lower():
+                    if wanted_digits:
+                        cam_no = wanted_digits
+                    else:
+                        cam_no = _extract_cam_number(h) or _extract_cam_number(v) or ""
 
+                    disp = h if len(h) >= len(v) else v
                     key = (site_lbl, cam_no, disp)
                     if key in seen:
                         continue
