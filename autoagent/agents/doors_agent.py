@@ -1,6 +1,11 @@
 # autoagent/agents/doors_agent.py
-from typing import Dict, Any, List
-from autoagent.data_access import doors as doors_da
+from typing import Dict, List
+from autoagent.data_access.doors import (
+    find_by_text,
+    find_location,
+    invalidate_cache as doors_invalidate,
+)
+
 
 def _format_row(r: Dict[str, Any]) -> str:
     site = r.get("__tab__", "") or ""
@@ -51,4 +56,3 @@ def handle(query: str, refresh: int = 0) -> Dict[str, Any]:
         "result": "\n".join(f"- {ln}" for ln in lines),
         # jakbyś chciał w przyszłości w UI ładniej renderować tabelkę:
         "rows": rows,  # <— pełne dane strukturalne
-    }
