@@ -32,12 +32,10 @@ def _read_one(sheet_id: str, tab: str, site_label: str) -> pd.DataFrame:
 
 
 def _pick_column(cols: List[str], *candidates: str) -> Optional[str]:
-    lc_map = {c.lower(): c for c in cols if isinstance(c, str)}
-    # pełne dopasowanie
+    lc_map = {c.lower(): c for c in cols if isinstance(c, str)]
     for cand in candidates:
         if cand.lower() in lc_map:
             return lc_map[cand.lower()]
-    # dopasowanie jako podciąg
     for c in cols:
         cl = c.lower() if isinstance(c, str) else ""
         for cand in candidates:
@@ -70,6 +68,18 @@ def _parse_site_from_query(q: str) -> Optional[str]:
     return None
 
 
+def _soft_norm(s: str) -> str:
+    t = str(s or "").lower()
+    t = t.replace("-", " ").replace("_", " ")
+    t = re.sub(r"\s+", " ", t).strip()
+    return t
+
+
+def _o0_swap_variants(s: str) -> set:
+    t = str(s or "").lower()
+    return {t, t.replace("o", "0"), t.replace("0", "o")}
+
+
 def _extract_cam_number(text: str) -> Optional[str]:
     if not text:
         return None
@@ -86,28 +96,58 @@ def _digits_from_query(q: str) -> Optional[str]:
     return m.group(1) if m else None
 
 
-# ========== Dodatkowe helpers do 'miękkiego' dopasowania ==========
-
-def _soft_norm(s: str) -> str:
-    t = str(s or "").lower()
-    t = t.replace("-", " ").replace("_", " ")
-    t = re.sub(r"\s+", " ", t).strip()
-    return t
+def _tokenize(q: str) -> List[str]:
+    toks = re.findall(r"[a-z0-9]+", q.lower())
+    return [t for t in toks if t]
 
 
-def _o0_swap_variants(s: str) -> set:
-    t = str(s or "").lower()
-    return {t, t.replace("o", "0"), t.replace("0", "o")}
+# --------- NEW: wybór najlepszego "tytułu" z dowolnej kolumny ---------
+_META_COLS = {"__site__", "_norm_all"}
 
+def _best_name_from_row(row: pd.Series, want_tokens: List[str]) -> str:
+    """
+    Gdy brak klasycznej kolumny 'Name/Description', wybierz najlepszą wartość
+    z dowolnej kolumny wiersza: ta o największej liczbie trafień tokenów,
+    przy remisie — najdłuższa.
+    """
+    best = ""
+    best_hits = -1
+    tokens = [t for t in want_tokens if t]
 
-def _clean_name(val: str) -> str:
-    """Usuwa 'nan/NaN/null/None' i zbędne spacje."""
-    if val is None:
-        return ""
-    s = str(val)
-    s = re.sub(r"\b(nan|NaN|null|None)\b", "", s, flags=re.IGNORECASE)
-    s = re.sub(r"\s+", " ", s).strip()
-    return s
+    for col, val in row.items():
+        if col in _META_COLS:
+            continue
+        s = str(val or "").strip()
+        if not s:
+            continue
+        norm = _soft_norm(s)
+        hits = 0
+        for t in tokens:
+            matched = False
+            for v in _o0_swap_variants(t):
+                if v and v in norm:
+                    matched = True
+                    break
+            if matched:
+                hits += 1
+        # wybór: najpierw po liczbie trafień, potem po długości
+        if hits > best_hits or (hits == best_hits and len(s) > len(best)):
+            best_hits = hits
+            best = s
+
+    # jeżeli nic nie pasuje tokenami, wybierz najdłuższą niepustą wartość
+    if not best:
+        longest = ""
+        for col, val in row.items():
+            if col in _META_COLS:
+                continue
+            s = str(val or "").strip()
+            if len(s) > len(longest):
+                longest = s
+        best = longest
+
+    return best
+# ----------------------------------------------------------------------
 
 
 # ========== Cache: wczytanie arkuszy ==========
@@ -132,7 +172,6 @@ def load_all() -> pd.DataFrame:
 
     df = pd.concat(dfs, ignore_index=True)
 
-    # Znormalizowany tekst do 'miękkiego' dopasowania
     try:
         df["_norm_all"] = df.astype(str).agg(" ".join, axis=1).map(_soft_norm)
     except Exception:
@@ -148,130 +187,122 @@ def invalidate_cache():
 # ========== API wyszukiwania ==========
 
 def search(query: str, limit: int = 10) -> List[Dict]:
+    """
+    Wyszukiwanie 'miękkie':
+      - AND po wszystkich tokenach tekstowych (np. "warehouse 35"),
+      - liczba w zapytaniu (np. 35) traktowana jako numer (bonus),
+      - tolerancja O<->0,
+      - sortowanie po score,
+      - zawsze wybieramy czytelny tytuł: klasyczna kolumna 'Name' lub fallback
+        ze skanowania całego wiersza (_best_name_from_row).
+    """
     df = load_all()
     if df.empty:
         return []
 
-    q = str(query or "").strip()
-    if not q:
+    q_raw = str(query or "").strip()
+    if not q_raw:
         return []
 
-    site = _parse_site_from_query(q)
+    site = _parse_site_from_query(q_raw)
     if site:
         df = df[df["__site__"] == site]
-    if df.empty:
-        return []
+        if df.empty:
+            return []
 
     col_num, col_name = _infer_number_and_name_columns(df)
-    ql = q.lower()
-    wanted_digits = _digits_from_query(q)
 
-    # 2) klasyczne dopasowanie
-    mask = pd.Series([False] * len(df), index=df.index)
-    if col_num and df[col_num].notna().any():
-        mask |= df[col_num].astype(str).str.lower().str.contains(ql, na=False)
-    if col_name and df[col_name].notna().any():
-        mask |= df[col_name].astype(str).str.lower().str.contains(ql, na=False)
+    q_norm = _soft_norm(q_raw)
+    tokens = _tokenize(q_norm)
+    digit_token = _digits_from_query(q_norm)
+    text_tokens = [t for t in tokens if not t.isdigit()]
 
-    # 3) miękkie dopasowanie
-    variants = {_soft_norm(v) for v in _o0_swap_variants(ql)}
-    for v in variants:
-        if v:
-            mask |= df["_norm_all"].str.contains(v, na=False)
+    def row_score(row) -> int:
+        text = str(row["_norm_all"])
+        score = 0
 
-    hits = df[mask]
+        # 1) cała fraza (warianty O<->0)
+        for v in _o0_swap_variants(q_norm):
+            if v and v in text:
+                score += 2
+                break
 
-    # 4) fallback
-    if hits.empty:
-        any_mask = df.astype(str).apply(
-            lambda row: row.str.lower().str.contains(ql, na=False).any(), axis=1
-        )
-        hits = df[any_mask]
+        # 2) AND po tokenach tekstowych
+        for t in text_tokens:
+            matched = False
+            for v in _o0_swap_variants(t):
+                if v in text:
+                    matched = True
+                    break
+            if matched:
+                score += 1
+            else:
+                return -1  # odrzut – brak jednego z tokenów
 
-    if hits.empty:
+        # 3) bonus za liczbę
+        if digit_token:
+            if col_num:
+                num_val = str(row.get(col_num, "")).strip()
+                if re.search(rf"(?:^|[^\d]){re.escape(digit_token)}(?:[^\d]|$)", num_val):
+                    score += 5
+            for v in _o0_swap_variants(digit_token):
+                if re.search(rf"(?:^|[^\d]){re.escape(v)}(?:[^\d]|$)", text):
+                    score += 3
+                    break
+
+        return score
+
+    scored = []
+    for idx, row in df.iterrows():
+        s = row_score(row)
+        if s >= 0:
+            scored.append((s, row))
+
+    if not scored:
         return []
 
-    # --- budowanie odpowiedzi z deduplikacją po (site, number) ---
-    out_map: Dict[Tuple[str, str], Dict] = {}
+    scored.sort(key=lambda x: (x[0], str(x[1].get("__site__", ""))), reverse=True)
 
-    def better(a: str, b: str) -> str:
-        """Wybierz lepszą nazwę: bez 'nan' i dłuższą."""
-        a, b = _clean_name(a), _clean_name(b)
-        if not a:
-            return b
-        if not b:
-            return a
-        # prefer name bez 'nan'
-        a_bad = "nan" in a.lower()
-        b_bad = "nan" in b.lower()
-        if a_bad and not b_bad:
-            return b
-        if b_bad and not a_bad:
-            return a
-        # dłuższa wygrywa
-        return a if len(a) >= len(b) else b
+    out: List[Dict] = []
+    seen: Set[Tuple[str, str, str]] = set()
 
-    for _, row in hits.iterrows():
+    for score, row in scored:
         site_lbl = row.get("__site__", "")
 
-        # numer
-        if wanted_digits:
-            cam_no = wanted_digits
+        # numer do wyświetlenia
+        cam_no = ""
+        if digit_token:
+            cam_no = digit_token
         else:
-            cam_no = None
             if col_num:
-                cam_no = _extract_cam_number(str(row.get(col_num, "")))
+                cam_no = _extract_cam_number(str(row.get(col_num, ""))) or ""
             if not cam_no and col_name:
-                cam_no = _extract_cam_number(str(row.get(col_name, "")))
-            cam_no = cam_no or ""
+                cam_no = _extract_cam_number(str(row.get(col_name, ""))) or ""
 
-        # jeśli user podał gołą liczbę – pilnuj dokładnego numeru
-        if wanted_digits and cam_no and cam_no != wanted_digits:
-            continue
-
-        # nazwa
+        # nazwa/opis – najpierw klasyczna kolumna, potem fallback z całego wiersza
         name_val = ""
         if col_name:
             name_val = str(row.get(col_name, "")).strip()
-        if not name_val and col_num:
-            name_val = str(row.get(col_num, "")).strip()
-        name_val = _clean_name(name_val)
+        if not name_val:
+            # użyj tokenów (tekstowych + liczbowego, jeśli był)
+            want_tokens = list(text_tokens)
+            if digit_token:
+                want_tokens.append(digit_token)
+            name_val = _best_name_from_row(row, want_tokens)
 
-        key = (site_lbl, cam_no)
+        key = (site_lbl, cam_no, name_val)
+        if key in seen:
+            continue
+        seen.add(key)
 
-        candidate = {
+        out.append({
             "__site__": site_lbl,
             "_number": cam_no,
             "_name": name_val,
             "_row": dict(row),
-        }
+        })
 
-        if key not in out_map:
-            out_map[key] = candidate
-        else:
-            # wybierz lepszą nazwę i zachowaj najbogatszy rekord
-            prev = out_map[key]
-            best_name = better(prev.get("_name", ""), name_val)
-            prev["_name"] = best_name
-            # (opcjonalnie) można też scalić _row jeśli chcesz
-            out_map[key] = prev
+        if len(out) >= max(1, limit):
+            break
 
-    out = list(out_map.values())
-
-    # posprzątaj jeszcze ewentualne puste nazwy
-    for item in out:
-        nm = _clean_name(item.get("_name", ""))
-        if not nm:
-            # spróbuj zbudować coś sensownego z _row (bez _norm_all)
-            row = item.get("_row", {}) or {}
-            candidates = []
-            for k, v in row.items():
-                if k == "_norm_all":
-                    continue
-                vs = _clean_name(v)
-                if vs:
-                    candidates.append(vs)
-            if candidates:
-                item["_name"] = max(candidates, key=len)
-
-    return out[: max(1, limit)]
+    return out
