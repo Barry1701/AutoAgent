@@ -150,7 +150,9 @@ def load_all() -> pd.DataFrame:
         df["_norm_all"] = df.astype(str).agg(" ".join, axis=1).map(_soft_norm)
     except Exception:
         # awaryjnie – jakby coś nie dało się zrzutować
-        df["_norm_all"] = df.apply(lambda r: _soft_norm(" ".join(map(str, r.values))), axis=1)
+        df["_norm_all"] = df.apply(
+            lambda r: _soft_norm(" ".join(map(str, r.values))), axis=1
+        )
 
     return df
 
@@ -173,7 +175,8 @@ def search(query: str, limit: int = 10) -> List[Dict]:
          - sprawdza warianty 'o'↔'0'
       4) Fallback: scan dowolnej kolumny (klasyczne contains).
     Dodatkowo wyświetlany _number jest wymuszany na 'gołej liczbie' znalezionej w zapytaniu,
-    aby nie łapać numerów z nawiasów w nagłówkach.
+    aby nie łapać numerów z nawiasów w nagłówkach. Jeśli użytkownik podał gołą liczbę,
+    filtrujemy do dokładnie tego numeru.
     """
     df = load_all()
     if df.empty:
@@ -202,7 +205,7 @@ def search(query: str, limit: int = 10) -> List[Dict]:
         mask |= df[col_name].astype(str).str.lower().str.contains(ql, na=False)
 
     # --- 3) miękkie dopasowanie na znormalizowanych tekstach
-    variants = { _soft_norm(v) for v in _o0_swap_variants(ql) }
+    variants = {_soft_norm(v) for v in _o0_swap_variants(ql)}
     for v in variants:
         if v:
             mask |= df["_norm_all"].str.contains(v, na=False)
@@ -238,12 +241,20 @@ def search(query: str, limit: int = 10) -> List[Dict]:
                     cam_no = _extract_cam_number(str(row.get(col_name, "")))
                 cam_no = cam_no or ""
 
+            # ✨ kluczowe: jeśli użytkownik podał gołą liczbę, trzymajmy się dokładnie tego numeru
+            if wanted_digits and cam_no and cam_no != wanted_digits:
+                continue
+
             # nazwa/opis do wyświetlenia
             name_val = ""
             if col_name:
                 name_val = str(row.get(col_name, "")).strip()
             if not name_val and col_num:
                 name_val = str(row.get(col_num, "")).strip()
+
+            # (opcjonalnie) quick cleanup drobnych śmieci z arkusza
+            if isinstance(name_val, str):
+                name_val = name_val.replace("nan ", "").replace("NaN", "").strip()
 
             key = (site_lbl, cam_no, name_val)
             if key in seen:
@@ -272,6 +283,11 @@ def search(query: str, limit: int = 10) -> List[Dict]:
                     else:
                         cam_no = _extract_cam_number(h) or _extract_cam_number(v) or ""
                     disp = h if len(h) >= len(v) else v
+
+                    # ✨ również pilnuj numeru w trybie „dziwnego layoutu”
+                    if wanted_digits and cam_no and cam_no != wanted_digits:
+                        continue
+
                     key = (site_lbl, cam_no, disp)
                     if key in seen:
                         continue
