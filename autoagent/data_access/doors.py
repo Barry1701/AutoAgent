@@ -9,7 +9,6 @@ from autoagent.utils.cache import ttl_cache
 
 SHEET_ID = os.getenv("DOORS_SHEET_ID")
 
-
 # ---------- normalizacja / pomocnicze ----------
 
 _STOPWORDS = {
@@ -40,7 +39,6 @@ def _extract_tokens(q: str) -> List[str]:
     # odfiltruj 1-znakowe śmieci
     return [t for t in flat if len(t) > 1]
 
-
 # ---------- wybór kolumn ----------
 
 def _pick_column(cols: List[str], *, exact: Optional[List[str]] = None,
@@ -63,6 +61,25 @@ def _pick_column(cols: List[str], *, exact: Optional[List[str]] = None,
                 return c
     return None
 
+def _find_cam_col(cols: List[str], want: str) -> Optional[str]:
+    """
+    Znajdź kolumnę kamer IN/OUT po nazwie (toleruje różne warianty nagłówków).
+    want: 'in' albo 'out'
+    """
+    want = want.lower()
+    # najpierw idealne trafienia
+    for c in cols:
+        cl = str(c).lower().strip()
+        if want == "in" and cl in {"cameras in", "camera in"}:
+            return c
+        if want == "out" and cl in {"cameras out", "camera out"}:
+            return c
+    # heurystyka: musi zawierać 'cam' i 'in'/'out'
+    for c in cols:
+        cl = str(c).lower()
+        if "cam" in cl and want in cl:
+            return c
+    return None
 
 def _ws_to_df(tab: str) -> pd.DataFrame:
     ws = get_worksheet(SHEET_ID, tab)
@@ -74,8 +91,8 @@ def _ws_to_df(tab: str) -> pd.DataFrame:
     df.columns = [str(c).strip() for c in df.columns]
     cols = list(df.columns)
 
-    # Kolumny z Twojego arkusza:
-    #   Door ID | Description PerC-Cure | Location Description | (kamery IN/OUT)
+    # Kolumny z arkusza:
+    #   Door ID | Description PerC-Cure | Location Description | Cameras IN | Cameras OUT
     col_door = _pick_column(
         cols,
         exact=["Door ID", "Reader ID", "Door", "Reader"],
@@ -93,20 +110,25 @@ def _ws_to_df(tab: str) -> pd.DataFrame:
         prefer_contains=["location description"],
         allow_contains=["location"]
     )
+    col_cam_in = _find_cam_col(cols, "in")
+    col_cam_out = _find_cam_col(cols, "out")
 
     out = pd.DataFrame()
     out["door"] = df[col_door].astype(str).str.strip() if col_door else ""
     out["description"] = df[col_desc].astype(str).str.strip() if col_desc else ""
     out["location"] = df[col_loc].astype(str).str.strip() if col_loc else ""
+    out["cameras_in"] = df[col_cam_in].astype(str).str.strip() if col_cam_in else ""
+    out["cameras_out"] = df[col_cam_out].astype(str).str.strip() if col_cam_out else ""
     out["__tab__"] = tab
 
     # znormalizowane pola do szybkiego contains
     out["_door_norm"] = out["door"].map(_norm_text)
     out["_desc_norm"] = out["description"].map(_norm_text)
     out["_loc_norm"] = out["location"].map(_norm_text)
+    out["_cin_norm"] = out["cameras_in"].map(_norm_text)
+    out["_cout_norm"] = out["cameras_out"].map(_norm_text)
 
     return out
-
 
 # ---------- ładowanie + cache ----------
 
@@ -142,12 +164,11 @@ def _load_all() -> pd.DataFrame:
 def invalidate_cache():
     _load_all.cache_clear()  # type: ignore[attr-defined]
 
-
 # ---------- public API ----------
 
 def find_by_text(query: str, limit: int = 10) -> List[Dict]:
     """
-    Ogólne wyszukiwanie (door/description/location) – OR.
+    Ogólne wyszukiwanie (door/description/location/cameras_in/cameras_out) – OR.
     """
     df = _load_all()
     if df.empty:
@@ -160,13 +181,14 @@ def find_by_text(query: str, limit: int = 10) -> List[Dict]:
     mask = (
         df["_door_norm"].str.contains(qn, na=False) |
         df["_desc_norm"].str.contains(qn, na=False) |
-        df["_loc_norm"].str.contains(qn, na=False)
+        df["_loc_norm"].str.contains(qn, na=False) |
+        df["_cin_norm"].str.contains(qn, na=False) |
+        df["_cout_norm"].str.contains(qn, na=False)
     )
     hits = df[mask]
     if hits.empty:
         return []
-    return hits[["door", "description", "location", "__tab__"]].head(limit).to_dict(orient="records")
-
+    return hits[["door", "description", "location", "cameras_in", "cameras_out", "__tab__"]].head(limit).to_dict(orient="records")
 
 def find_location(query: str, limit: int = 10) -> List[Dict]:
     """
@@ -174,7 +196,7 @@ def find_location(query: str, limit: int = 10) -> List[Dict]:
     Trafienie jeśli:
       A) wszystkie tokeny są w JEDNEJ kolumnie (door/description/location), albo
       B) w tekście łączonym jest >=2 tokenów, albo
-      C) pasuje fraza bezpośrednio (np. 'unsecure_corridor_no6' lub 'unsecure corridor no6').
+      C) pasuje fraza bezpośrednio.
     """
     df = _load_all()
     if df.empty:
@@ -185,10 +207,9 @@ def find_location(query: str, limit: int = 10) -> List[Dict]:
     phrase_underscore = re.sub(r"\s+", "_", q_raw)
     phrase_spaces = re.sub(r"[_]+", " ", q_raw)
 
-    tokens = _extract_tokens(q_raw)   # np. ['unsecure', 'corridor', 'no6']
+    tokens = _extract_tokens(q_raw)
 
     if not tokens:
-        # bez sensownych tokenów – użyj prostego OR contains
         return find_by_text(query, limit=limit)
 
     def contains_all(text: str, toks: List[str]) -> bool:
@@ -201,19 +222,18 @@ def find_location(query: str, limit: int = 10) -> List[Dict]:
         door = row["_door_norm"]
         desc = row["_desc_norm"]
         loc  = row["_loc_norm"]
-        combined = f"{door} {desc} {loc}"
+        cin  = row.get("_cin_norm", "")
+        cout = row.get("_cout_norm", "")
+        combined = f"{door} {desc} {loc} {cin} {cout}"
 
-        # C) frazy bezpośrednie (zachowujemy też oryginał w lowercase)
         if phrase_underscore and phrase_underscore in combined:
             return True
         if phrase_spaces and phrase_spaces in combined:
             return True
 
-        # A) wszystkie tokeny w JEDNEJ kolumnie
         if contains_all(door, tokens) or contains_all(desc, tokens) or contains_all(loc, tokens):
             return True
 
-        # B) w tekście łączonym >= 2 trafionych tokenów (łagodniej dla nazw typu NO6)
         if count_hits(combined, tokens) >= max(2, len(tokens) - 1):
             return True
 
@@ -223,4 +243,4 @@ def find_location(query: str, limit: int = 10) -> List[Dict]:
     if hits.empty:
         return []
 
-    return hits[["door", "description", "location", "__tab__"]].head(limit).to_dict(orient="records")
+    return hits[["door", "description", "location", "cameras_in", "cameras_out", "__tab__"]].head(limit).to_dict(orient="records")
