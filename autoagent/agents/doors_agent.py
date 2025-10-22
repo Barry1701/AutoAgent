@@ -1,25 +1,32 @@
 # autoagent/agents/doors_agent.py
-from typing import Dict, Any, List
+# Agent do wyszukiwania drzwi (PPK1/PPK2/Expansion) z wyświetlaniem Cameras IN / OUT
+
+from typing import Any, Dict, List, Optional
+
+# Data access layer (czyta z Google Sheets + cache)
 from autoagent.data_access import doors as doors_da
 
-def _format_row(r: Dict[str, Any]) -> str:
-    site = r.get("__tab__", "") or ""
-    door = r.get("door", "") or ""
-    desc = r.get("description", "") or ""
-    loc  = r.get("location", "") or ""
-    cin  = (r.get("cameras_in") or "").strip()
-    cout = (r.get("cameras_out") or "").strip()
+
+def _format_row(row: Dict[str, Any]) -> str:
+    """
+    Buduje jedną linijkę opisu drzwi w czytelnym formacie:
+    [PPK1] D-G26 — Opis — Location: ... — Cameras IN: ... — Cameras OUT: ...
+    """
+    site = (row.get("__tab__") or "").strip()
+    door = (row.get("door") or "").strip()
+    desc = (row.get("description") or "").strip()
+    loc  = (row.get("location") or "").strip()
+    cin  = (row.get("cameras_in") or "").strip()
+    cout = (row.get("cameras_out") or "").strip()
 
     parts: List[str] = []
-    # główna linia (jak było)
-    head = f"[{site}] {door} — {desc}".strip(" —")
+    head = f"[{site}] {door}".strip()
+    if desc:
+        head = f"{head} — {desc}"
     parts.append(head)
 
-    # location jeśli jest
     if loc:
         parts.append(f"Location: {loc}")
-
-    # cameras in/out jeśli są
     if cin:
         parts.append(f"Cameras IN: {cin}")
     if cout:
@@ -27,28 +34,60 @@ def _format_row(r: Dict[str, Any]) -> str:
 
     return " — ".join(parts)
 
-def handle(query: str, refresh: int = 0) -> Dict[str, Any]:
-    if refresh:
-        doors_da.invalidate_cache()
 
-    # spróbuj dopasowania „gdzie jest…”
-    rows = doors_da.find_location(query, limit=10)
-    if not rows:
-        rows = doors_da.find_by_text(query, limit=10)
+def doors_agent(query: str, context: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+    """
+    Główna funkcja agenta (zgodna z app.py):
+      - query: tekst zapytania (np. 'g26', 'where is UNSECURE_CORRIDOR_NO6')
+      - context: słownik z flagą 'refresh' ('1' | '0') do czyszczenia cache'a
 
-    if not rows:
+    Zwraca:
+      {
+        "agent": "doors_agent",
+        "query": <query>,
+        "result": <czytelny string z listą pozycji>,
+        "rows": <surowe rekordy (lista słowników)>
+      }
+    """
+    try:
+        refresh = 0
+        if context and isinstance(context, dict):
+            refresh = int(context.get("refresh", 0)) if context.get("refresh") is not None else 0
+
+        # pozwalamy wymusić odświeżenie cache'a
+        if refresh:
+            doors_da.invalidate_cache()
+
+        # najpierw spróbuj dopasowanie „lokacyjne” (tokens, frazy),
+        # potem fallback: ogólne OR contains
+        rows = doors_da.find_location(query, limit=10)
+        if not rows:
+            rows = doors_da.find_by_text(query, limit=10)
+
+        if not rows:
+            return {
+                "agent": "doors_agent",
+                "query": query,
+                "result": "No matching doors.",
+                "rows": [],
+            }
+
+        # Czytelny string z myślnikami (ładnie wyświetli się we froncie)
+        lines = [_format_row(r) for r in rows]
+        pretty = "\n".join(f"- {ln}" for ln in lines)
+
         return {
             "agent": "doors_agent",
             "query": query,
-            "result": "No matching doors.",
+            "result": pretty,
+            "rows": rows,
         }
 
-    lines = [_format_row(r) for r in rows]
-    return {
-        "agent": "doors_agent",
-        "query": query,
-        # zostawiamy „result” jako string – frontend nic nie musi zmieniać
-        "result": "\n".join(f"- {ln}" for ln in lines),
-        # jakbyś chciał w przyszłości w UI ładniej renderować tabelkę:
-        "rows": rows,  # <— pełne dane strukturalne
-    }
+    except Exception as e:
+        # Nigdy nie wywalaj serwera — zwróć kontrolowany błąd
+        return {
+            "agent": "doors_agent",
+            "query": query,
+            "result": f"Error: {e}",
+            "rows": [],
+        }
