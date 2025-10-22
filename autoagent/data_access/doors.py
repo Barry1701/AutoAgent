@@ -9,15 +9,12 @@ from autoagent.utils.cache import ttl_cache
 
 SHEET_ID = os.getenv("DOORS_SHEET_ID")
 
-# ---------- normalizacja / pomocnicze ----------
-
 _STOPWORDS = {
     "where", "is", "are", "the", "a", "an", "of", "for", "to", "at", "in",
     "door", "reader", "location", "please", "tell", "me", "what", "which"
 }
 
 def _norm_text(x: str) -> str:
-    """Lower + zamiana wszystkiego co nie-alfanum na spacje + zbij wielokrotne spacje."""
     if not isinstance(x, str):
         x = "" if pd.isna(x) else str(x)
     s = x.lower()
@@ -26,25 +23,21 @@ def _norm_text(x: str) -> str:
     return s
 
 def _extract_tokens(q: str) -> List[str]:
-    """
-    Wyciąga sensowne tokeny do dopasowania (bez stopwordów).
-    'where is UNSECURE_CORRIDOR_NO6' -> ['unsecure', 'corridor', 'no6']
-    """
     raw = re.findall(r"[a-z0-9_]+", str(q).lower())
     toks = [t.replace("_", " ") for t in raw if t not in _STOPWORDS]
-    # spłaszcz ewentualne 'a_b' -> ['a','b']
     flat: List[str] = []
     for t in toks:
         flat.extend([p for p in t.split() if p])
-    # odfiltruj 1-znakowe śmieci
     return [t for t in flat if len(t) > 1]
 
-# ---------- wybór kolumn ----------
-
-def _pick_column(cols: List[str], *, exact: Optional[List[str]] = None,
-                 prefer_contains: Optional[List[str]] = None,
-                 allow_contains: Optional[List[str]] = None) -> Optional[str]:
-    lc_map = {c.lower(): c for c in cols if isinstance(c, str)}
+def _pick_column(
+    cols: List[str],
+    *,
+    exact: Optional[List[str]] = None,
+    prefer_contains: Optional[List[str]] = None,
+    allow_contains: Optional[List[str]] = None,
+) -> Optional[str]:
+    lc_map = {str(c).lower(): c for c in cols if isinstance(c, str)}
     if exact:
         for e in exact:
             if e.lower() in lc_map:
@@ -61,26 +54,6 @@ def _pick_column(cols: List[str], *, exact: Optional[List[str]] = None,
                 return c
     return None
 
-def _find_cam_col(cols: List[str], want: str) -> Optional[str]:
-    """
-    Znajdź kolumnę kamer IN/OUT po nazwie (toleruje różne warianty nagłówków).
-    want: 'in' albo 'out'
-    """
-    want = want.lower()
-    # najpierw idealne trafienia
-    for c in cols:
-        cl = str(c).lower().strip()
-        if want == "in" and cl in {"cameras in", "camera in"}:
-            return c
-        if want == "out" and cl in {"cameras out", "camera out"}:
-            return c
-    # heurystyka: musi zawierać 'cam' i 'in'/'out'
-    for c in cols:
-        cl = str(c).lower()
-        if "cam" in cl and want in cl:
-            return c
-    return None
-
 def _ws_to_df(tab: str) -> pd.DataFrame:
     ws = get_worksheet(SHEET_ID, tab)
     rows = ws.get_all_records()
@@ -91,46 +64,51 @@ def _ws_to_df(tab: str) -> pd.DataFrame:
     df.columns = [str(c).strip() for c in df.columns]
     cols = list(df.columns)
 
-    # Kolumny z arkusza:
-    #   Door ID | Description PerC-Cure | Location Description | Cameras IN | Cameras OUT
+    # Główne pola
     col_door = _pick_column(
         cols,
         exact=["Door ID", "Reader ID", "Door", "Reader"],
-        prefer_contains=["door id", "reader id", "door", "reader"]
+        prefer_contains=["door id", "reader id", "door", "reader"],
     )
     col_desc = _pick_column(
         cols,
         exact=["Description PerC-Cure"],
         prefer_contains=["description per", "per-c", "perc"],
-        allow_contains=["description"]
+        allow_contains=["description"],
     )
     col_loc = _pick_column(
         cols,
         exact=["Location Description"],
         prefer_contains=["location description"],
-        allow_contains=["location"]
+        allow_contains=["location"],
     )
-    col_cam_in = _find_cam_col(cols, "in")
-    col_cam_out = _find_cam_col(cols, "out")
+
+    # Kamery IN/OUT (obsługa wariantów nazw)
+    col_in = _pick_column(
+        cols,
+        exact=["Cameras IN", "Camera IN", "Cameras In"],
+        prefer_contains=["cameras in", "camera in", "in cameras", "in camera"],
+    )
+    col_out = _pick_column(
+        cols,
+        exact=["Cameras OUT", "Camera OUT", "Cameras Out"],
+        prefer_contains=["cameras out", "camera out", "out cameras", "out camera"],
+    )
 
     out = pd.DataFrame()
     out["door"] = df[col_door].astype(str).str.strip() if col_door else ""
     out["description"] = df[col_desc].astype(str).str.strip() if col_desc else ""
     out["location"] = df[col_loc].astype(str).str.strip() if col_loc else ""
-    out["cameras_in"] = df[col_cam_in].astype(str).str.strip() if col_cam_in else ""
-    out["cameras_out"] = df[col_cam_out].astype(str).str.strip() if col_cam_out else ""
+    out["cameras_in"] = df[col_in].astype(str).str.strip() if col_in else ""
+    out["cameras_out"] = df[col_out].astype(str).str.strip() if col_out else ""
     out["__tab__"] = tab
 
-    # znormalizowane pola do szybkiego contains
+    # znormalizowane do wyszukiwania
     out["_door_norm"] = out["door"].map(_norm_text)
     out["_desc_norm"] = out["description"].map(_norm_text)
     out["_loc_norm"] = out["location"].map(_norm_text)
-    out["_cin_norm"] = out["cameras_in"].map(_norm_text)
-    out["_cout_norm"] = out["cameras_out"].map(_norm_text)
 
     return out
-
-# ---------- ładowanie + cache ----------
 
 @ttl_cache(ttl_seconds=300)
 def _load_all() -> pd.DataFrame:
@@ -154,7 +132,6 @@ def _load_all() -> pd.DataFrame:
         try:
             frames.append(_ws_to_df(tab))
         except Exception:
-            # pomijamy brakujące zakładki
             continue
 
     if not frames:
@@ -164,12 +141,7 @@ def _load_all() -> pd.DataFrame:
 def invalidate_cache():
     _load_all.cache_clear()  # type: ignore[attr-defined]
 
-# ---------- public API ----------
-
 def find_by_text(query: str, limit: int = 10) -> List[Dict]:
-    """
-    Ogólne wyszukiwanie (door/description/location/cameras_in/cameras_out) – OR.
-    """
     df = _load_all()
     if df.empty:
         return []
@@ -179,34 +151,25 @@ def find_by_text(query: str, limit: int = 10) -> List[Dict]:
 
     qn = _norm_text(q)
     mask = (
-        df["_door_norm"].str.contains(qn, na=False) |
-        df["_desc_norm"].str.contains(qn, na=False) |
-        df["_loc_norm"].str.contains(qn, na=False) |
-        df["_cin_norm"].str.contains(qn, na=False) |
-        df["_cout_norm"].str.contains(qn, na=False)
+        df["_door_norm"].str.contains(qn, na=False)
+        | df["_desc_norm"].str.contains(qn, na=False)
+        | df["_loc_norm"].str.contains(qn, na=False)
     )
     hits = df[mask]
     if hits.empty:
         return []
-    return hits[["door", "description", "location", "cameras_in", "cameras_out", "__tab__"]].head(limit).to_dict(orient="records")
+    return hits[
+        ["door", "description", "location", "cameras_in", "cameras_out", "__tab__"]
+    ].head(limit).to_dict(orient="records")
 
 def find_location(query: str, limit: int = 10) -> List[Dict]:
-    """
-    Wyszukiwanie pytania „gdzie jest …” – dopasowanie tokenów i fraz.
-    Trafienie jeśli:
-      A) wszystkie tokeny są w JEDNEJ kolumnie (door/description/location), albo
-      B) w tekście łączonym jest >=2 tokenów, albo
-      C) pasuje fraza bezpośrednio.
-    """
     df = _load_all()
     if df.empty:
         return []
 
-    # oryginalna fraza + wersje uproszczone
     q_raw = (query or "").strip().lower()
     phrase_underscore = re.sub(r"\s+", "_", q_raw)
     phrase_spaces = re.sub(r"[_]+", " ", q_raw)
-
     tokens = _extract_tokens(q_raw)
 
     if not tokens:
@@ -221,10 +184,8 @@ def find_location(query: str, limit: int = 10) -> List[Dict]:
     def row_match(row) -> bool:
         door = row["_door_norm"]
         desc = row["_desc_norm"]
-        loc  = row["_loc_norm"]
-        cin  = row.get("_cin_norm", "")
-        cout = row.get("_cout_norm", "")
-        combined = f"{door} {desc} {loc} {cin} {cout}"
+        loc = row["_loc_norm"]
+        combined = f"{door} {desc} {loc}"
 
         if phrase_underscore and phrase_underscore in combined:
             return True
@@ -243,4 +204,6 @@ def find_location(query: str, limit: int = 10) -> List[Dict]:
     if hits.empty:
         return []
 
-    return hits[["door", "description", "location", "cameras_in", "cameras_out", "__tab__"]].head(limit).to_dict(orient="records")
+    return hits[
+        ["door", "description", "location", "cameras_in", "cameras_out", "__tab__"]
+    ].head(limit).to_dict(orient="records")
