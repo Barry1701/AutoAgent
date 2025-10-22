@@ -1,53 +1,54 @@
 # autoagent/agents/doors_agent.py
-from typing import Dict, List
-from autoagent.data_access.doors import (
-    find_by_text,
-    find_location,
-    invalidate_cache as doors_invalidate,
-)
+from typing import Dict, Any, List
+from autoagent.data_access import doors as doors_da
 
+def _format_row(r: Dict[str, Any]) -> str:
+    site = r.get("__tab__", "") or ""
+    door = r.get("door", "") or ""
+    desc = r.get("description", "") or ""
+    loc  = r.get("location", "") or ""
+    cin  = (r.get("cameras_in") or "").strip()
+    cout = (r.get("cameras_out") or "").strip()
 
-def _wants_location(q: str) -> bool:
-    t = (q or "").lower()
-    return ("where is" in t) or ("location" in t) or (t.startswith("where "))
+    parts: List[str] = []
+    # główna linia (jak było)
+    head = f"[{site}] {door} — {desc}".strip(" —")
+    parts.append(head)
 
+    # location jeśli jest
+    if loc:
+        parts.append(f"Location: {loc}")
 
-def doors_agent(query: str, context: Dict = {}) -> str:
-    """
-    Examples:
-      - 'D0-19' / '032E' / 'UNSECURE_CORRIDOR_NO6'
-      - 'where is UNSECURE_CORRIDOR_NO6'
-    """
-    # allow cache refresh: ... refresh=1
-    refresh = str(context.get("refresh", "")).lower()
-    if refresh in ("1", "true", "yes"):
-        doors_invalidate()
+    # cameras in/out jeśli są
+    if cin:
+        parts.append(f"Cameras IN: {cin}")
+    if cout:
+        parts.append(f"Cameras OUT: {cout}")
 
-    # jeśli pytamy o lokalizację -> spróbuj specjalnego find_location()
-    if _wants_location(query):
-        rows: List[Dict] = find_location(query, limit=10)
-        if not rows:
-            return "No matching doors (location) found."
+    return " — ".join(parts)
 
-        r = rows[0]
-        tab = r.get("__tab__", "")
-        door = r.get("door", "")
-        loc = r.get("location") or r.get("description") or ""
-        return f"[{tab}] {door}: {loc}" if loc else f"[{tab}] {door}: (no location available)"
+def handle(query: str, refresh: int = 0) -> Dict[str, Any]:
+    if refresh:
+        doors_da.invalidate_cache()
 
-    # w innym wypadku używamy ogólnego wyszukiwania
-    rows: List[Dict] = find_by_text(query, limit=10)
+    # spróbuj dopasowania „gdzie jest…”
+    rows = doors_da.find_location(query, limit=10)
     if not rows:
-        return "No matching doors found."
+        rows = doors_da.find_by_text(query, limit=10)
 
-    lines: List[str] = []
-    for r in rows:
-        tab = r.get("__tab__", "")
-        door = r.get("door", "")
-        desc = r.get("description", "")
-        loc = r.get("location", "")
-        if loc:
-            lines.append(f"[{tab}] {door} — {desc} — {loc}")
-        else:
-            lines.append(f"[{tab}] {door} — {desc}")
-    return "\n".join(lines)
+    if not rows:
+        return {
+            "agent": "doors_agent",
+            "query": query,
+            "result": "No matching doors.",
+        }
+
+    lines = [_format_row(r) for r in rows]
+    return {
+        "agent": "doors_agent",
+        "query": query,
+        # zostawiamy „result” jako string – frontend nic nie musi zmieniać
+        "result": "\n".join(f"- {ln}" for ln in lines),
+        # jakbyś chciał w przyszłości w UI ładniej renderować tabelkę:
+        "rows": rows,  # <— pełne dane strukturalne
+    }
