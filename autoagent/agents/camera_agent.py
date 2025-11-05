@@ -5,22 +5,18 @@ from autoagent.data_access import cameras
 
 def camera_agent(query: str, context: Dict[str, str] | None = None) -> Dict[str, Any]:
     """
-    Zwraca listę kamer w formacie zgodnym z frontem:
+    Zwraca PŁASKI payload (app.py sam doda agent/query):
     {
-      "agent": "camera_agent",
-      "query": "...",
-      "result": {
-        "result": "<czytelny_tekst>",
-        "rows": [
-          {
-            "__site__": "PPK1" | "PPK2",
-            "_number": "204",
-            "_name": "IE-DUB-DAT3 ....",
-            "_row": { ... }     # pełen wiersz z arkusza (opcjonalnie)
-          },
-          ...
-        ]
-      }
+      "result": "<czytelny_tekst>",
+      "rows": [
+        {
+          "__site__": "PPK1" | "PPK2",
+          "_number": "204",
+          "_name": "IE-DUB-DAT3 ....",
+          "_row": { ... }     # pełen wiersz z arkusza (opcjonalnie)
+        },
+        ...
+      ]
     }
     """
     ctx = context or {}
@@ -29,21 +25,18 @@ def camera_agent(query: str, context: Dict[str, str] | None = None) -> Dict[str,
 
     rows: List[Dict[str, Any]] = cameras.search(query, limit=10)
 
-    # Tekstowa, skrócona lista (używane jako fallback / kopia do logów)
+    # Tekstowa skrócona lista (log/fallback)
     if rows:
         lines = [
-            f"- [{r.get('__site__','?')}] #{r.get('_number','?')} — {r.get('_name','').strip()}"
+            f"- [{r.get('__site__','?')}] #{r.get('_number','?')} — {str(r.get('_name','')).strip()}"
             for r in rows
         ]
         text = "Matches:\n" + "\n".join(lines)
     else:
         text = "No matching cameras."
 
+    # PŁASKO – BEZ podwójnej koperty
     return {
-        "agent": "camera_agent",
-        "query": query,
-        "result": {
-            "result": text,
-            "rows": rows,
-        },
+        "result": text,
+        "rows": rows,
     }

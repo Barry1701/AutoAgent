@@ -2,14 +2,12 @@
 # Agent do wyszukiwania drzwi (PPK1/PPK2/Expansion) z wyświetlaniem Cameras IN / OUT
 
 from typing import Any, Dict, List, Optional
-
-# Data access layer (czyta z Google Sheets + cache)
 from autoagent.data_access import doors as doors_da
 
 
 def _format_row(row: Dict[str, Any]) -> str:
     """
-    Buduje jedną linijkę opisu drzwi w czytelnym formacie:
+    Buduje jedną linijkę opisu drzwi:
     [PPK1] D-G26 — Opis — Location: ... — Cameras IN: ... — Cameras OUT: ...
     """
     site = (row.get("__tab__") or "").strip()
@@ -37,57 +35,41 @@ def _format_row(row: Dict[str, Any]) -> str:
 
 def doors_agent(query: str, context: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
     """
-    Główna funkcja agenta (zgodna z app.py):
-      - query: tekst zapytania (np. 'g26', 'where is UNSECURE_CORRIDOR_NO6')
-      - context: słownik z flagą 'refresh' ('1' | '0') do czyszczenia cache'a
-
-    Zwraca:
-      {
-        "agent": "doors_agent",
-        "query": <query>,
-        "result": <czytelny string z listą pozycji>,
-        "rows": <surowe rekordy (lista słowników)>
-      }
+    Zwraca PŁASKI payload (app.py doda agent/query):
+    {
+      "result": "<czytelny string listy>",
+      "rows": [ {...}, ... ]
+    }
     """
     try:
         refresh = 0
         if context and isinstance(context, dict):
             refresh = int(context.get("refresh", 0)) if context.get("refresh") is not None else 0
 
-        # pozwalamy wymusić odświeżenie cache'a
         if refresh:
             doors_da.invalidate_cache()
 
-        # najpierw spróbuj dopasowanie „lokacyjne” (tokens, frazy),
-        # potem fallback: ogólne OR contains
         rows = doors_da.find_location(query, limit=10)
         if not rows:
             rows = doors_da.find_by_text(query, limit=10)
 
         if not rows:
             return {
-                "agent": "doors_agent",
-                "query": query,
                 "result": "No matching doors.",
                 "rows": [],
             }
 
-        # Czytelny string z myślnikami (ładnie wyświetli się we froncie)
         lines = [_format_row(r) for r in rows]
         pretty = "\n".join(f"- {ln}" for ln in lines)
 
+        # PŁASKO – BEZ podwójnej koperty
         return {
-            "agent": "doors_agent",
-            "query": query,
             "result": pretty,
             "rows": rows,
         }
 
     except Exception as e:
-        # Nigdy nie wywalaj serwera — zwróć kontrolowany błąd
         return {
-            "agent": "doors_agent",
-            "query": query,
             "result": f"Error: {e}",
             "rows": [],
         }
