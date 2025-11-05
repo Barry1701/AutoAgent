@@ -37,10 +37,10 @@ ALLOW_ORIGIN_REGEX = r"^https://.*\.gitpod\.io$|^https://.*\.herokuapp\.com$"
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOW_ORIGINS or ["http://localhost:5173"],
-    allow_origin_regex=ALLOW_ORIGIN_REGEX,
+    allow_origin_regex=r"^https://.*\.gitpod\.io$|^https://.*\.herokuapp\.com$",
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_methods=["*"],   # GET/POST/OPTIONS itd.
+    allow_headers=["*"],   # <- kluczowe: pozwól na wszystkie nagłówki (w tym sec-ch-ua)
 )
 
 # --- Bearer Auth (dla wszystkich endpointów /api/* poza /api/health) ---
