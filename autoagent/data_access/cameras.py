@@ -1,7 +1,7 @@
 # autoagent/data_access/cameras.py
 import os
 import re
-from typing import List, Dict, Optional, Tuple, Set
+from typing import List, Dict, Optional, Tuple
 
 import pandas as pd
 
@@ -71,6 +71,7 @@ def _parse_site_from_query(q: str) -> Optional[str]:
 
 
 def _extract_cam_number(text: str) -> Optional[str]:
+    """Wydobądź 1–4 cyfry z pola numeru (akceptuje formy: '12', '# 12', '(12)')"""
     if not text:
         return None
     m = re.search(r"(?:^|[^0-9])(#[ ]*\d{1,4}|\(\s*\d{1,4}\s*\)|\b\d{1,4}\b)", str(text))
@@ -82,6 +83,7 @@ def _extract_cam_number(text: str) -> Optional[str]:
 
 
 def _digits_from_query(q: str) -> Optional[str]:
+    """Jeśli użytkownik podał 'gołą' liczbę (1–6 cyfr), zwróć ją."""
     m = re.search(r"\b(\d{1,6})\b", q)
     return m.group(1) if m else None
 
@@ -166,22 +168,21 @@ def search(query: str, limit: int = 10) -> List[Dict]:
     ql = q.lower()
     wanted_digits = _digits_from_query(q)
 
-    # 2) klasyczne dopasowanie
+    # 1) klasyczne dopasowanie (kolumny Number/Name/Description)
     mask = pd.Series([False] * len(df), index=df.index)
     if col_num and df[col_num].notna().any():
         mask |= df[col_num].astype(str).str.lower().str.contains(ql, na=False)
     if col_name and df[col_name].notna().any():
         mask |= df[col_name].astype(str).str.lower().str.contains(ql, na=False)
 
-    # 3) miękkie dopasowanie
-    variants = {_soft_norm(v) for v in _o0_swap_variants(ql)}
-    for v in variants:
+    # 2) miękkie dopasowanie po całym wierszu (_norm_all)
+    for v in {_soft_norm(v) for v in _o0_swap_variants(ql)}:
         if v:
             mask |= df["_norm_all"].str.contains(v, na=False)
 
     hits = df[mask]
 
-    # 4) fallback
+    # 3) fallback – cokolwiek w wierszu zawiera ql
     if hits.empty:
         any_mask = df.astype(str).apply(
             lambda row: row.str.lower().str.contains(ql, na=False).any(), axis=1
@@ -191,7 +192,7 @@ def search(query: str, limit: int = 10) -> List[Dict]:
     if hits.empty:
         return []
 
-    # --- budowanie odpowiedzi z deduplikacją po (site, number) ---
+    # --- budowanie odpowiedzi z deduplikacją ---
     out_map: Dict[Tuple[str, str], Dict] = {}
 
     def better(a: str, b: str) -> str:
@@ -201,35 +202,32 @@ def search(query: str, limit: int = 10) -> List[Dict]:
             return b
         if not b:
             return a
-        # prefer name bez 'nan'
         a_bad = "nan" in a.lower()
         b_bad = "nan" in b.lower()
         if a_bad and not b_bad:
             return b
         if b_bad and not a_bad:
             return a
-        # dłuższa wygrywa
         return a if len(a) >= len(b) else b
 
     for _, row in hits.iterrows():
         site_lbl = row.get("__site__", "")
 
-        # numer
+        # --- WYDOBĄDŹ REALNY NUMER Z WIERSZA ---
+        row_no = ""
+        if col_num:
+            row_no = _extract_cam_number(str(row.get(col_num, ""))) or ""
+        if not row_no and col_name:
+            row_no = _extract_cam_number(str(row.get(col_name, ""))) or ""
+
+        # --- JEŚLI UŻYTKOWNIK PISAŁ GOŁĄ LICZBĘ → TYLKO DOKŁADNY NUMER ---
         if wanted_digits:
-            cam_no = wanted_digits
-        else:
-            cam_no = None
-            if col_num:
-                cam_no = _extract_cam_number(str(row.get(col_num, "")))
-            if not cam_no and col_name:
-                cam_no = _extract_cam_number(str(row.get(col_name, "")))
-            cam_no = cam_no or ""
+            if row_no and row_no != wanted_digits:
+                continue
+            if not row_no:
+                continue  # wiersz bez numeru nie spełnia zapytania typu "12"
 
-        # jeśli user podał gołą liczbę – pilnuj dokładnego numeru
-        if wanted_digits and cam_no and cam_no != wanted_digits:
-            continue
-
-        # nazwa
+        # --- NAZWA DO WYŚWIETLENIA ---
         name_val = ""
         if col_name:
             name_val = str(row.get(col_name, "")).strip()
@@ -237,32 +235,29 @@ def search(query: str, limit: int = 10) -> List[Dict]:
             name_val = str(row.get(col_num, "")).strip()
         name_val = _clean_name(name_val)
 
-        key = (site_lbl, cam_no)
+        # --- KLUCZ DEDUPLIKACJI ---
+        dedup_key = (site_lbl, row_no or name_val)
 
         candidate = {
             "__site__": site_lbl,
-            "_number": cam_no,
+            "_number": row_no,   # prawdziwy numer z wiersza (albo "")
             "_name": name_val,
             "_row": dict(row),
         }
 
-        if key not in out_map:
-            out_map[key] = candidate
+        if dedup_key not in out_map:
+            out_map[dedup_key] = candidate
         else:
-            # wybierz lepszą nazwę i zachowaj najbogatszy rekord
-            prev = out_map[key]
-            best_name = better(prev.get("_name", ""), name_val)
-            prev["_name"] = best_name
-            # (opcjonalnie) można też scalić _row jeśli chcesz
-            out_map[key] = prev
+            prev = out_map[dedup_key]
+            prev["_name"] = better(prev.get("_name", ""), name_val)
+            out_map[dedup_key] = prev
 
     out = list(out_map.values())
 
-    # posprzątaj jeszcze ewentualne puste nazwy
+    # posprzątaj puste nazwy
     for item in out:
         nm = _clean_name(item.get("_name", ""))
         if not nm:
-            # spróbuj zbudować coś sensownego z _row (bez _norm_all)
             row = item.get("_row", {}) or {}
             candidates = []
             for k, v in row.items():
