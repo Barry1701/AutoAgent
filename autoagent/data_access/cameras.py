@@ -70,36 +70,59 @@ def _parse_site_from_query(q: str) -> Optional[str]:
     return None
 
 
-def _extract_cam_number(text: str) -> Optional[str]:
-    """Wydobądź 1–4 cyfry z pola numeru (akceptuje formy: '12', '# 12', '(12)')"""
-    if not text:
+# ---------- wydobywanie numeru ----------
+
+_DIGIT_GROUP = re.compile(r"\d{1,6}")
+
+def _first_digits(s: str) -> Optional[str]:
+    """Pierwsza grupa cyfr 1–6 (używane do kolumny Number)."""
+    if not s:
         return None
-    m = re.search(r"(?:^|[^0-9])(#[ ]*\d{1,4}|\(\s*\d{1,4}\s*\)|\b\d{1,4}\b)", str(text))
-    if not m:
+    m = _DIGIT_GROUP.search(str(s))
+    return m.group(0) if m else None
+
+
+def _extract_cam_number_from_name(name: str) -> Optional[str]:
+    """
+    Spróbuj znaleźć numer 1–4 cyfr w typowych formach:
+      '(12)', '#12', '-12', 'E25', 'PTZ-204' itd.
+    Preferujemy krótkie (1–4) cyfry; ignorujemy długie liczniki typu '(511)' jeśli jest lepszy kandydat.
+    """
+    if not name:
         return None
-    token = m.group(1)
-    digits = re.sub(r"[^\d]", "", token)
-    return digits or None
+    s = str(name)
 
+    # 1) mocno typowe formy
+    for rx in (
+        r"(?:^|[^0-9])#\s*(\d{1,4})(?!\d)",         # #12
+        r"\(\s*(\d{1,4})\s*\)",                    # (12)
+        r"(?:^|[^A-Za-z0-9])-(\d{1,4})(?!\d)",     # -12
+        r"(?:^|[^A-Za-z])([Ee]\d{1,4})(?!\d)",     # E25 -> weźmiemy cyfry poniżej
+        r"(?:^|[^A-Za-z0-9])([A-Za-z]{1,3}-?\d{1,4})(?!\d)",  # C1M-12, PTZ-204
+    ):
+        m = re.search(rx, s)
+        if m:
+            token = m.group(1)
+            digits = re.search(r"\d{1,4}", token)
+            if digits:
+                return digits.group(0)
 
-def _digits_from_query(q: str) -> Optional[str]:
-    """Jeśli użytkownik podał 'gołą' liczbę (1–6 cyfr), zwróć ją."""
-    m = re.search(r"\b(\d{1,6})\b", q)
-    return m.group(1) if m else None
+    # 2) zbierz wszystkie grupy 1–4 cyfr i wybierz tę, która wygląda najbardziej „kamerowo”
+    groups = re.findall(r"\b(\d{1,4})\b", s)
+    if groups:
+        # preferuj te poprzedzone '-' lub w nawiasie gdzieś w środku, NIE ostatnie wielkie liczniki
+        for rx in (r"-\s*(\d{1,4})\b", r"\(\s*(\d{1,4})\s*\)"):
+            m2 = re.search(rx, s)
+            if m2:
+                return m2.group(1)
+        # fallback: pierwsza krótka grupa 1–3 cyfr
+        for g in groups:
+            if len(g) <= 3:
+                return g
+        # ostatnia deska: pierwsza z listy
+        return groups[0]
 
-
-# ========== Dodatkowe helpers do 'miękkiego' dopasowania ==========
-
-def _soft_norm(s: str) -> str:
-    t = str(s or "").lower()
-    t = t.replace("-", " ").replace("_", " ")
-    t = re.sub(r"\s+", " ", t).strip()
-    return t
-
-
-def _o0_swap_variants(s: str) -> set:
-    t = str(s or "").lower()
-    return {t, t.replace("o", "0"), t.replace("0", "o")}
+    return None
 
 
 def _clean_name(val: str) -> str:
@@ -147,6 +170,20 @@ def invalidate_cache():
     load_all.cache_clear()  # type: ignore[attr-defined]
 
 
+# ========== Dodatkowe helpers do 'miękkiego' dopasowania ==========
+
+def _soft_norm(s: str) -> str:
+    t = str(s or "").lower()
+    t = t.replace("-", " ").replace("_", " ")
+    t = re.sub(r"\s+", " ", t).strip()
+    return t
+
+
+def _o0_swap_variants(s: str) -> set:
+    t = str(s or "").lower()
+    return {t, t.replace("o", "0"), t.replace("0", "o")}
+
+
 # ========== API wyszukiwania ==========
 
 def search(query: str, limit: int = 10) -> List[Dict]:
@@ -166,7 +203,8 @@ def search(query: str, limit: int = 10) -> List[Dict]:
 
     col_num, col_name = _infer_number_and_name_columns(df)
     ql = q.lower()
-    wanted_digits = _digits_from_query(q)
+    wanted_digits = re.fullmatch(r"\d{1,6}", q.strip())
+    wanted_digits = wanted_digits.group(0) if wanted_digits else None
 
     # 1) klasyczne dopasowanie (kolumny Number/Name/Description)
     mask = pd.Series([False] * len(df), index=df.index)
@@ -196,7 +234,6 @@ def search(query: str, limit: int = 10) -> List[Dict]:
     out_map: Dict[Tuple[str, str], Dict] = {}
 
     def better(a: str, b: str) -> str:
-        """Wybierz lepszą nazwę: bez 'nan' i dłuższą."""
         a, b = _clean_name(a), _clean_name(b)
         if not a:
             return b
@@ -213,19 +250,23 @@ def search(query: str, limit: int = 10) -> List[Dict]:
     for _, row in hits.iterrows():
         site_lbl = row.get("__site__", "")
 
-        # --- WYDOBĄDŹ REALNY NUMER Z WIERSZA ---
+        # --- WYDOBĄDŹ NUMER ---
         row_no = ""
         if col_num:
-            row_no = _extract_cam_number(str(row.get(col_num, ""))) or ""
+            row_no = _first_digits(str(row.get(col_num, ""))) or ""
         if not row_no and col_name:
-            row_no = _extract_cam_number(str(row.get(col_name, ""))) or ""
+            row_no = _extract_cam_number_from_name(str(row.get(col_name, ""))) or ""
 
         # --- JEŚLI UŻYTKOWNIK PISAŁ GOŁĄ LICZBĘ → TYLKO DOKŁADNY NUMER ---
         if wanted_digits:
+            # 1) mamy wyłuskany numer i nie pasuje → pomiń
             if row_no and row_no != wanted_digits:
                 continue
-            if not row_no:
-                continue  # wiersz bez numeru nie spełnia zapytania typu "12"
+            # 2) nie udało się wyłuskać – sprawdź odseparowane wystąpienie wanted_digits w nazwie
+            if not row_no and col_name:
+                name_s = str(row.get(col_name, ""))
+                if not re.search(rf"(?<!\d){wanted_digits}(?!\d)", name_s):
+                    continue
 
         # --- NAZWA DO WYŚWIETLENIA ---
         name_val = ""
