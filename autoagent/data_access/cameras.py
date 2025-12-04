@@ -11,6 +11,7 @@ from autoagent.utils.cache import ttl_cache
 
 # ========== Helpers do odczytu ==========
 
+
 def _read_one(sheet_id: str, tab: str, site_label: str) -> pd.DataFrame:
     ws = get_worksheet(sheet_id, tab)
     rows = ws.get_all_records()
@@ -20,7 +21,7 @@ def _read_one(sheet_id: str, tab: str, site_label: str) -> pd.DataFrame:
     df = pd.DataFrame(rows)
 
     # odetnij spacje z nagłówków
-    new_cols = {}
+    new_cols: Dict[str, str] = {}
     for c in df.columns:
         if isinstance(c, str):
             new_cols[c] = c.strip()
@@ -50,13 +51,24 @@ def _infer_number_and_name_columns(df: pd.DataFrame) -> Tuple[Optional[str], Opt
     cols = list(df.columns)
     col_num = _pick_column(
         cols,
-        "Camera Number", "Number", "#", "ID",
-        "Cam Number", "Cam No", "Camera #", "Camera ID"
+        "Camera Number",
+        "Number",
+        "#",
+        "ID",
+        "Cam Number",
+        "Cam No",
+        "Camera #",
+        "Camera ID",
     )
     col_name = _pick_column(
         cols,
-        "Camera Name", "Name", "Description", "Camera Description",
-        "Cam Name", "Cam Description", "Title"
+        "Camera Name",
+        "Name",
+        "Description",
+        "Camera Description",
+        "Cam Name",
+        "Cam Description",
+        "Title",
     )
     return col_num, col_name
 
@@ -96,10 +108,10 @@ def _extract_cam_number_from_name(name: str) -> Optional[str]:
 
     # 1) mocno typowe formy
     for rx in (
-        r"(?:^|[^0-9])#\s*(\d{1,4})(?!\d)",         # #12
-        r"\(\s*(\d{1,4})\s*\)",                    # (12)
-        r"(?:^|[^A-Za-z0-9])-(\d{1,4})(?!\d)",     # -12
-        r"(?:^|[^A-Za-z])([Ee]\d{1,4})(?!\d)",     # E25 -> weźmiemy cyfry poniżej
+        r"(?:^|[^0-9])#\s*(\d{1,4})(?!\d)",  # #12
+        r"\(\s*(\d{1,4})\s*\)",  # (12)
+        r"(?:^|[^A-Za-z0-9])-(\d{1,4})(?!\d)",  # -12
+        r"(?:^|[^A-Za-z])([Ee]\d{1,4})(?!\d)",  # E25 -> cyfry poniżej
         r"(?:^|[^A-Za-z0-9])([A-Za-z]{1,3}-?\d{1,4})(?!\d)",  # C1M-12, PTZ-204
     ):
         m = re.search(rx, s)
@@ -112,7 +124,7 @@ def _extract_cam_number_from_name(name: str) -> Optional[str]:
     # 2) zbierz wszystkie grupy 1–4 cyfr i wybierz tę, która wygląda najbardziej „kamerowo”
     groups = re.findall(r"\b(\d{1,4})\b", s)
     if groups:
-        # preferuj te poprzedzone '-' lub w nawiasie
+        # preferuj te poprzedzone '-' lub w nawiasie gdzieś w środku, NIE ostatnie wielkie liczniki
         for rx in (r"-\s*(\d{1,4})\b", r"\(\s*(\d{1,4})\s*\)"):
             m2 = re.search(rx, s)
             if m2:
@@ -139,6 +151,7 @@ def _clean_name(val: str) -> str:
 
 # ========== Cache: wczytanie arkuszy ==========
 
+
 @ttl_cache(ttl_seconds=300)
 def load_all() -> pd.DataFrame:
     sheet1 = os.getenv("CAM_PPK1_SHEET_ID")
@@ -149,7 +162,7 @@ def load_all() -> pd.DataFrame:
     if not sheet1:
         raise RuntimeError("Missing CAM_PPK1_SHEET_ID in .env")
 
-    dfs = []
+    dfs: List[pd.DataFrame] = []
     dfs.append(_read_one(sheet1, tab1, "PPK1"))
     if sheet2:
         dfs.append(_read_one(sheet2, tab2, "PPK2"))
@@ -176,6 +189,7 @@ def invalidate_cache():
 
 # ========== Dodatkowe helpers do 'miękkiego' dopasowania ==========
 
+
 def _soft_norm(s: str) -> str:
     t = str(s or "").lower()
     t = t.replace("-", " ").replace("_", " ")
@@ -189,6 +203,7 @@ def _o0_swap_variants(s: str) -> set:
 
 
 # ========== API wyszukiwania ==========
+
 
 def search(query: str, limit: int = 10) -> List[Dict]:
     df = load_all()
@@ -238,7 +253,8 @@ def search(query: str, limit: int = 10) -> List[Dict]:
     out_map: Dict[Tuple[str, str], Dict] = {}
 
     def better(a: str, b: str) -> str:
-        a, b = _clean_name(a), _clean_name(b)
+        a = _clean_name(a)
+        b = _clean_name(b)
         if not a:
             return b
         if not b:
@@ -261,31 +277,16 @@ def search(query: str, limit: int = 10) -> List[Dict]:
         if not row_no and col_name:
             row_no = _extract_cam_number_from_name(str(row.get(col_name, ""))) or ""
 
-        # --- JEŚLI UŻYTKOWNIK PISAŁ GOŁĄ LICZBĘ (np. "16") ---
+        # --- JEŚLI UŻYTKOWNIK PISAŁ GOŁĄ LICZBĘ → TYLKO DOKŁADNY NUMER ---
         if wanted_digits:
-            # cały wiersz jako tekst
-            whole_row_text = " ".join(str(v) for v in row.values)
-            has_standalone = bool(
-                re.search(rf"(?<!\d){wanted_digits}(?!\d)", whole_row_text)
-            )
-
-            if row_no:
-                # jeśli mamy numer z kolumny i:
-                # - jest inny niż szukany
-                # - i nie ma w ogóle '16' jako osobnej liczby
-                #   → odrzuć
-                if row_no != wanted_digits and not has_standalone:
+            # 1) mamy wyłuskany numer i nie pasuje → pomiń
+            if row_no and row_no != wanted_digits:
+                continue
+            # 2) nie udało się wyłuskać – sprawdź odseparowane wystąpienie wanted_digits w nazwie
+            if not row_no and col_name:
+                name_s = str(row.get(col_name, ""))
+                if not re.search(rf"(?<!\d){wanted_digits}(?!\d)", name_s):
                     continue
-                # jeśli w wierszu jest '16', ale row_no inny (np. 381),
-                # traktujemy '16' jako ważniejszy numer
-                if has_standalone and row_no != wanted_digits:
-                    row_no = wanted_digits
-            else:
-                # nie umiemy wyciągnąć numeru z kolumn; jeśli w wierszu nie ma '16'
-                # jako osobnej liczby, pomijamy
-                if not has_standalone:
-                    continue
-                row_no = wanted_digits
 
         # --- NAZWA DO WYŚWIETLENIA ---
         name_val = ""
@@ -296,19 +297,20 @@ def search(query: str, limit: int = 10) -> List[Dict]:
         name_val = _clean_name(name_val)
 
         # --- KLUCZ DEDUPLIKACJI ---
-    # Jeśli użytkownik wpisał goły numer (np. "16"), zostawiamy
-    # wszystkie różne kamery o tym numerze – deduplikujemy po nazwie.
-    if wanted_digits:
-        dedup_key = (site_lbl, name_val or row_no)
-    else:
-        dedup_key = (site_lbl, row_no or name_val)
+        # Jeśli zapytanie jest czystym numerem (np. "16"), nie łączymy kamer
+        # o tym samym numerze – deduplikujemy po nazwie.
+        if wanted_digits:
+            dedup_key = (site_lbl, name_val or row_no)
+        else:
+            dedup_key = (site_lbl, row_no or name_val)
 
-    candidate = {
-        "__site__": site_lbl,
-        "_number": row_no,   # prawdziwy numer z wiersza (albo "")
-        "_name": name_val,
-        "_row": dict(row),
-    }
+        candidate = {
+            "__site__": site_lbl,
+            "_number": row_no,  # prawdziwy numer z wiersza (albo "")
+            "_name": name_val,
+            "_row": dict(row),
+        }
+
         if dedup_key not in out_map:
             out_map[dedup_key] = candidate
         else:
@@ -323,7 +325,7 @@ def search(query: str, limit: int = 10) -> List[Dict]:
         nm = _clean_name(item.get("_name", ""))
         if not nm:
             row = item.get("_row", {}) or {}
-            candidates = []
+            candidates: List[str] = []
             for k, v in row.items():
                 if k == "_norm_all":
                     continue
