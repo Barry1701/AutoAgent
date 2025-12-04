@@ -74,6 +74,7 @@ def _parse_site_from_query(q: str) -> Optional[str]:
 
 _DIGIT_GROUP = re.compile(r"\d{1,6}")
 
+
 def _first_digits(s: str) -> Optional[str]:
     """Pierwsza grupa cyfr 1–6 (używane do kolumny Number)."""
     if not s:
@@ -86,7 +87,8 @@ def _extract_cam_number_from_name(name: str) -> Optional[str]:
     """
     Spróbuj znaleźć numer 1–4 cyfr w typowych formach:
       '(12)', '#12', '-12', 'E25', 'PTZ-204' itd.
-    Preferujemy krótkie (1–4) cyfry; ignorujemy długie liczniki typu '(511)' jeśli jest lepszy kandydat.
+    Preferujemy krótkie (1–4) cyfry; ignorujemy długie liczniki typu '(511)'
+    jeśli jest lepszy kandydat.
     """
     if not name:
         return None
@@ -110,7 +112,7 @@ def _extract_cam_number_from_name(name: str) -> Optional[str]:
     # 2) zbierz wszystkie grupy 1–4 cyfr i wybierz tę, która wygląda najbardziej „kamerowo”
     groups = re.findall(r"\b(\d{1,4})\b", s)
     if groups:
-        # preferuj te poprzedzone '-' lub w nawiasie gdzieś w środku, NIE ostatnie wielkie liczniki
+        # preferuj te poprzedzone '-' lub w nawiasie
         for rx in (r"-\s*(\d{1,4})\b", r"\(\s*(\d{1,4})\s*\)"):
             m2 = re.search(rx, s)
             if m2:
@@ -161,7 +163,9 @@ def load_all() -> pd.DataFrame:
     try:
         df["_norm_all"] = df.astype(str).agg(" ".join, axis=1).map(_soft_norm)
     except Exception:
-        df["_norm_all"] = df.apply(lambda r: _soft_norm(" ".join(map(str, r.values))), axis=1)
+        df["_norm_all"] = df.apply(
+            lambda r: _soft_norm(" ".join(map(str, r.values))), axis=1
+        )
 
     return df
 
@@ -203,8 +207,8 @@ def search(query: str, limit: int = 10) -> List[Dict]:
 
     col_num, col_name = _infer_number_and_name_columns(df)
     ql = q.lower()
-    wanted_digits = re.fullmatch(r"\d{1,6}", q.strip())
-    wanted_digits = wanted_digits.group(0) if wanted_digits else None
+    wanted_digits_match = re.fullmatch(r"\d{1,6}", q.strip())
+    wanted_digits = wanted_digits_match.group(0) if wanted_digits_match else None
 
     # 1) klasyczne dopasowanie (kolumny Number/Name/Description)
     mask = pd.Series([False] * len(df), index=df.index)
@@ -257,16 +261,31 @@ def search(query: str, limit: int = 10) -> List[Dict]:
         if not row_no and col_name:
             row_no = _extract_cam_number_from_name(str(row.get(col_name, ""))) or ""
 
-        # --- JEŚLI UŻYTKOWNIK PISAŁ GOŁĄ LICZBĘ → TYLKO DOKŁADNY NUMER ---
+        # --- JEŚLI UŻYTKOWNIK PISAŁ GOŁĄ LICZBĘ (np. "16") ---
         if wanted_digits:
-            # 1) mamy wyłuskany numer i nie pasuje → pomiń
-            if row_no and row_no != wanted_digits:
-                continue
-            # 2) nie udało się wyłuskać – sprawdź odseparowane wystąpienie wanted_digits w nazwie
-            if not row_no and col_name:
-                name_s = str(row.get(col_name, ""))
-                if not re.search(rf"(?<!\d){wanted_digits}(?!\d)", name_s):
+            # cały wiersz jako tekst
+            whole_row_text = " ".join(str(v) for v in row.values)
+            has_standalone = bool(
+                re.search(rf"(?<!\d){wanted_digits}(?!\d)", whole_row_text)
+            )
+
+            if row_no:
+                # jeśli mamy numer z kolumny i:
+                # - jest inny niż szukany
+                # - i nie ma w ogóle '16' jako osobnej liczby
+                #   → odrzuć
+                if row_no != wanted_digits and not has_standalone:
                     continue
+                # jeśli w wierszu jest '16', ale row_no inny (np. 381),
+                # traktujemy '16' jako ważniejszy numer
+                if has_standalone and row_no != wanted_digits:
+                    row_no = wanted_digits
+            else:
+                # nie umiemy wyciągnąć numeru z kolumn; jeśli w wierszu nie ma '16'
+                # jako osobnej liczby, pomijamy
+                if not has_standalone:
+                    continue
+                row_no = wanted_digits
 
         # --- NAZWA DO WYŚWIETLENIA ---
         name_val = ""
