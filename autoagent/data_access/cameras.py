@@ -268,7 +268,7 @@ def search(query: str, limit: int = 10) -> List[Dict]:
         site_lbl = row.get("__site__", "")
 
         # --- WYDOBĄDŹ NUMER ---
-        # 1) numer z nazwy (ostatnie nawiasy, np. (16), (381))
+        # 1) numer z "nazwy" (jeśli taką kolumnę mamy)
         row_no_name = ""
         if col_name:
             row_no_name = _extract_cam_number_from_name(str(row.get(col_name, ""))) or ""
@@ -278,21 +278,23 @@ def search(query: str, limit: int = 10) -> List[Dict]:
         if col_num:
             row_no_sheet = _first_digits(str(row.get(col_num, ""))) or ""
 
-        # preferujemy numer z nazwy (to jest to, co wpisuje oficer – 16, 381 itd.)
+        # 3) jeśli dalej brak numeru – spróbuj z CAŁEGO WIERSZA
         row_no = row_no_name or row_no_sheet
+        if not row_no:
+            full_text_for_number = " ".join(str(v) for v in row.values)
+            row_no_full = _extract_cam_number_from_name(full_text_for_number) or ""
+            if row_no_full:
+                row_no = row_no_full
 
-        # --- JEŚLI UŻYTKOWNIK PISAŁ GOŁĄ LICZBĘ → zawężamy do dokładnego numeru,
-        #     albo do wyraźnego, odseparowanego wystąpienia w nazwie.
+        # --- JEŚLI UŻYTKOWNIK PISAŁ GOŁĄ LICZBĘ → zawężamy do dokładnego numeru
         if wanted_digits:
             if row_no and row_no != wanted_digits:
-                # numer nie pasuje -> jeszcze dajemy szansę nazwie, ale tylko na izolowane
-                if col_name:
-                    name_s = str(row.get(col_name, ""))
-                    if not re.search(rf"(?<!\d){wanted_digits}(?!\d)", name_s):
-                        continue
-            elif not row_no and col_name:
-                name_s = str(row.get(col_name, ""))
-                if not re.search(rf"(?<!\d){wanted_digits}(?!\d)", name_s):
+                # numer wyciągnięty, ale inny -> odrzuć
+                continue
+            elif not row_no:
+                # brak numeru – sprawdź, czy ta liczba w ogóle występuje jako osobne cyfry
+                full_text = " ".join(str(v) for v in row.values)
+                if not re.search(rf"(?<!\d){wanted_digits}(?!\d)", full_text):
                     continue
 
         # --- NAZWA DO WYŚWIETLENIA ---
