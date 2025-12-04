@@ -1,74 +1,109 @@
-def operations_agent(query: str, context: Dict[str, Any] | None = None) -> Dict[str, Any]:
+# autoagent/agents/operations_agent.py
+import re
+from typing import Any
+
+# Wykorzystujemy istniejących „specjalistów”
+from .staff_directory_agent import staff_directory_agent
+from .camera_agent import camera_agent
+from .doors_agent import doors_agent
+
+STAFF_KEYWORDS = [
+    "psa", "contact", "pin", "ldap", "l-dap", "first aid", "safepass",
+    "badge", "earpiece", "emergency", "licence", "license", "expiry", "expiration"
+]
+CAMERA_KEYWORDS = [
+    "camera", "cctv", "flir", "ppk1", "ppk 1", "ppk2", "ppk 2"
+]
+DOOR_KEYWORDS = [
+    "door", "reader", "badge reader", "c-cure", "ccure", "ccure 900", "access"
+]
+
+# wzorce typowe dla zapytań drzwiowych (np. 032E, 052A, 2–4 cyfry + litera)
+RE_DOOR_CODE = re.compile(r"\b\d{2,4}[A-Z]\b", re.IGNORECASE)
+# wzorzec „goły numer” – zwykle kamery (np. „204”)
+RE_PURE_NUMBER = re.compile(r"^\D*(\d{2,6})\D*$")
+
+
+def _looks_like_door_query(q: str) -> bool:
+    t = q.lower()
+    if any(k in t for k in DOOR_KEYWORDS):
+        return True
+    if RE_DOOR_CODE.search(q):
+        return True
+    return False
+
+
+def _looks_like_camera_query(q: str) -> bool:
+    t = q.lower()
+    if any(k in t for k in CAMERA_KEYWORDS):
+        return True
+    # Krótkie zapytanie z numerem (np. „204”) traktujemy jako kamerę
+    m = RE_PURE_NUMBER.match(q)
+    if m and len(m.group(1)) <= 4:
+        return True
+    return False
+
+
+def _looks_like_staff_query(q: str) -> bool:
+    t = q.lower()
+    if any(k in t for k in STAFF_KEYWORDS):
+        return True
+    # heurystyka: zawiera „for <Name>” albo dwa „słowa” z wielkiej litery (imię + nazwisko)
+    if re.search(r"\bfor\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+", q):
+        return True
+    cap_words = re.findall(r"\b[A-Z][a-z]+", q)
+    if len(cap_words) >= 2:
+        return True
+    return False
+
+
+def operations_agent(query: str, context: dict | None = None) -> str:
     """
     Jeden punkt wejścia:
       - rozpoznaje intencję (staff / camera / doors)
       - wywołuje właściwego agenta
-      - zwraca spójny payload:
+      - przekazuje context (np. refresh=1)
 
-      {
-        "agent": "staff" | "camera" | "doors",
-        "query": "<oryginalne zapytanie>",
-        "result": "<czytelny tekst>",
-        "rows": [ {...}, ... ]  # opcjonalne
-      }
+    Zwraca zwykły string (gotowy tekst odpowiedzi dla użytkownika).
     """
     q = (query or "").strip()
-    ctx = context or {}
+    ctx: dict[str, Any] = context or {}
 
-    def _with_meta(agent_name: str, payload: Dict[str, Any]) -> Dict[str, Any]:
-        return {
-            "agent": agent_name,
-            "query": q,
-            "result": payload.get("result", ""),
-            "rows": payload.get("rows", []),
-        }
-
+    # 1) Twarde prefiksy (użytkownik może wymusić)
     lower = q.lower()
-
-    # 1) Prefiksy wymuszające
     if lower.startswith("staff:"):
-        sub_q = q.split(":", 1)[1].strip()
-        return _with_meta("staff", _staff_payload(sub_q, ctx))
-
+        return staff_directory_agent(q.split(":", 1)[1].strip(), context=ctx)
     if lower.startswith("camera:") or lower.startswith("cameras:"):
-        sub_q = q.split(":", 1)[1].strip()
-        return _with_meta("camera", camera_agent(sub_q, context=ctx))
-
+        # camera_agent zwraca dict, ale my zwrócimy część .get("result")
+        cam_resp = camera_agent(q.split(":", 1)[1].strip(), context=ctx)
+        return cam_resp.get("result", "No matching cameras.")
     if lower.startswith("door:") or lower.startswith("doors:"):
-        sub_q = q.split(":", 1)[1].strip()
-        return _with_meta("doors", doors_agent(sub_q, context=ctx))
+        door_resp = doors_agent(q.split(":", 1)[1].strip(), context=ctx)
+        return door_resp.get("result", "No matching doors.")
 
     # 2) Heurystyki intencji
     if _looks_like_door_query(q):
-        return _with_meta("doors", doors_agent(q, context=ctx))
-
+        door_resp = doors_agent(q, context=ctx)
+        return door_resp.get("result", "No matching doors.")
     if _looks_like_camera_query(q):
-        return _with_meta("camera", camera_agent(q, context=ctx))
-
+        cam_resp = camera_agent(q, context=ctx)
+        return cam_resp.get("result", "No matching cameras.")
     if _looks_like_staff_query(q):
-        return _with_meta("staff", _staff_payload(q, ctx))
+        return staff_directory_agent(q, context=ctx)
 
-    # 3) Fallback – spróbujmy po kolei
-    doors_payload = doors_agent(q, context=ctx)
-    if doors_payload.get("rows"):
-        return _with_meta("doors", doors_payload)
+    # 3) Fallback – kolejność: doors -> cameras -> staff
+    resp_doors = doors_agent(q, context=ctx)
+    if resp_doors and "No matching doors" not in resp_doors.get("result", ""):
+        return resp_doors.get("result", "")
 
-    camera_payload = camera_agent(q, context=ctx)
-    if camera_payload.get("rows"):
-        return _with_meta("camera", camera_payload)
+    resp_cams = camera_agent(q, context=ctx)
+    if resp_cams and resp_cams.get("result", "").strip() not in (
+        "[]", "No matching cameras.", "[] # —"
+    ):
+        return resp_cams.get("result", "")
 
-    staff_payload = _staff_payload(q, ctx)
-    # jak staff zwróci jakiś sensowny tekst zamiast "nie znam", uznajemy za sukces
-    if "couldn't find a matching employee" not in staff_payload["result"].lower():
-        return _with_meta("staff", staff_payload)
+    resp_staff = staff_directory_agent(q, context=ctx)
+    if resp_staff and "couldn't find a matching employee" not in resp_staff.lower():
+        return resp_staff
 
-    # 4) Nic nie złapało
-    return {
-        "agent": "unknown",
-        "query": q,
-        "result": (
-            "I couldn't determine what you need. "
-            "Try e.g. 'psa John Smith', '204', or '052A'."
-        ),
-        "rows": [],
-    }
+    return "I couldn't determine what you need. Try e.g. 'psa John Smith', '204', or '052A'."
