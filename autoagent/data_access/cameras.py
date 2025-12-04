@@ -98,18 +98,21 @@ def _first_digits(s: str) -> Optional[str]:
 def _extract_cam_number_from_name(name: str) -> Optional[str]:
     """
     Spróbuj znaleźć numer 1–4 cyfr w typowych formach:
-      '(12)', '#12', '-12', 'E25', 'PTZ-204' itd.
-    Preferujemy krótkie (1–4) cyfry; ignorujemy długie liczniki typu '(511)'
-    jeśli jest lepszy kandydat.
+      - preferencja: OSTATNIE '(123)' w nazwie
+      - inne formy: '#12', '-12', 'E25', 'PTZ-204' itd.
     """
     if not name:
         return None
     s = str(name)
 
-    # 1) mocno typowe formy
+    # 0) Najpierw: ostatnie nawiasy zawierające tylko cyfry, np. (16), (381)
+    only_digits_parens = re.findall(r"\(\s*(\d{1,4})\s*\)", s)
+    if only_digits_parens:
+        return only_digits_parens[-1]
+
+    # 1) pozostałe heurystyki (hashe, minusy, tokeny alfanumeryczne)
     for rx in (
         r"(?:^|[^0-9])#\s*(\d{1,4})(?!\d)",  # #12
-        r"\(\s*(\d{1,4})\s*\)",  # (12)
         r"(?:^|[^A-Za-z0-9])-(\d{1,4})(?!\d)",  # -12
         r"(?:^|[^A-Za-z])([Ee]\d{1,4})(?!\d)",  # E25 -> cyfry poniżej
         r"(?:^|[^A-Za-z0-9])([A-Za-z]{1,3}-?\d{1,4})(?!\d)",  # C1M-12, PTZ-204
@@ -121,19 +124,13 @@ def _extract_cam_number_from_name(name: str) -> Optional[str]:
             if digits:
                 return digits.group(0)
 
-    # 2) zbierz wszystkie grupy 1–4 cyfr i wybierz tę, która wygląda najbardziej „kamerowo”
+    # 2) zbierz wszystkie grupy 1–4 cyfr i wybierz sensowną
     groups = re.findall(r"\b(\d{1,4})\b", s)
     if groups:
-        # preferuj te poprzedzone '-' lub w nawiasie gdzieś w środku, NIE ostatnie wielkie liczniki
-        for rx in (r"-\s*(\d{1,4})\b", r"\(\s*(\d{1,4})\s*\)"):
-            m2 = re.search(rx, s)
-            if m2:
-                return m2.group(1)
-        # fallback: pierwsza krótka grupa 1–3 cyfr
+        # preferuj krótsze, 1–3 cyfry
         for g in groups:
             if len(g) <= 3:
                 return g
-        # ostatnia deska: pierwsza z listy
         return groups[0]
 
     return None
@@ -271,19 +268,29 @@ def search(query: str, limit: int = 10) -> List[Dict]:
         site_lbl = row.get("__site__", "")
 
         # --- WYDOBĄDŹ NUMER ---
-        row_no = ""
-        if col_num:
-            row_no = _first_digits(str(row.get(col_num, ""))) or ""
-        if not row_no and col_name:
-            row_no = _extract_cam_number_from_name(str(row.get(col_name, ""))) or ""
+        # 1) numer z nazwy (ostatnie nawiasy, np. (16), (381))
+        row_no_name = ""
+        if col_name:
+            row_no_name = _extract_cam_number_from_name(str(row.get(col_name, ""))) or ""
 
-        # --- JEŚLI UŻYTKOWNIK PISAŁ GOŁĄ LICZBĘ → TYLKO DOKŁADNY NUMER ---
+        # 2) numer z kolumny Number / ID (fallback)
+        row_no_sheet = ""
+        if col_num:
+            row_no_sheet = _first_digits(str(row.get(col_num, ""))) or ""
+
+        # preferujemy numer z nazwy (to jest to, co wpisuje oficer – 16, 381 itd.)
+        row_no = row_no_name or row_no_sheet
+
+        # --- JEŚLI UŻYTKOWNIK PISAŁ GOŁĄ LICZBĘ → zawężamy do dokładnego numeru,
+        #     albo do wyraźnego, odseparowanego wystąpienia w nazwie.
         if wanted_digits:
-            # 1) mamy wyłuskany numer i nie pasuje → pomiń
             if row_no and row_no != wanted_digits:
-                continue
-            # 2) nie udało się wyłuskać – sprawdź odseparowane wystąpienie wanted_digits w nazwie
-            if not row_no and col_name:
+                # numer nie pasuje -> jeszcze dajemy szansę nazwie, ale tylko na izolowane
+                if col_name:
+                    name_s = str(row.get(col_name, ""))
+                    if not re.search(rf"(?<!\d){wanted_digits}(?!\d)", name_s):
+                        continue
+            elif not row_no and col_name:
                 name_s = str(row.get(col_name, ""))
                 if not re.search(rf"(?<!\d){wanted_digits}(?!\d)", name_s):
                     continue
@@ -300,13 +307,13 @@ def search(query: str, limit: int = 10) -> List[Dict]:
         # Jeśli zapytanie jest czystym numerem (np. "16"), nie łączymy kamer
         # o tym samym numerze – deduplikujemy po nazwie.
         if wanted_digits:
-            dedup_key = (site_lbl, name_val or row_no)
+            dedup_key = (site_lbl, name_val or row_no or "")
         else:
             dedup_key = (site_lbl, row_no or name_val)
 
         candidate = {
             "__site__": site_lbl,
-            "_number": row_no,  # prawdziwy numer z wiersza (albo "")
+            "_number": row_no,  # numer kamery dla operatora (np. 16, 381)
             "_name": name_val,
             "_row": dict(row),
         }
