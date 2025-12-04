@@ -296,15 +296,19 @@ def search(query: str, limit: int = 10) -> List[Dict]:
         name_val = _clean_name(name_val)
 
         # --- KLUCZ DEDUPLIKACJI ---
+    # Jeśli użytkownik wpisał goły numer (np. "16"), zostawiamy
+    # wszystkie różne kamery o tym numerze – deduplikujemy po nazwie.
+    if wanted_digits:
+        dedup_key = (site_lbl, name_val or row_no)
+    else:
         dedup_key = (site_lbl, row_no or name_val)
 
-        candidate = {
-            "__site__": site_lbl,
-            "_number": row_no,   # prawdziwy numer z wiersza (albo "")
-            "_name": name_val,
-            "_row": dict(row),
-        }
-
+    candidate = {
+        "__site__": site_lbl,
+        "_number": row_no,   # prawdziwy numer z wiersza (albo "")
+        "_name": name_val,
+        "_row": dict(row),
+    }
         if dedup_key not in out_map:
             out_map[dedup_key] = candidate
         else:
